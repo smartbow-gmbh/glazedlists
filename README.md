@@ -1,6 +1,6 @@
 ## Glazed Lists - List transformations in Java
 
-[![Build Status](https://travis-ci.org/glazedlists/glazedlists.svg?branch=master)](https://travis-ci.org/glazedlists/glazedlists)
+[![Build Status](https://travis-ci.org/swimmesberger/glazedlists.svg?branch=master)](https://travis-ci.org/swimmesberger/glazedlists)
 
 [![Join the chat at https://gitter.im/glazedlists/glazedlists](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/glazedlists/glazedlists)
 
@@ -20,7 +20,7 @@ See documentation at [www.glazedlists.com](http://www.glazedlists.com/documentat
 
 Browse [Release Notes](http://www.glazedlists.com/releases)
 
-Download [Latest Release](http://repo1.maven.org/maven2/com/glazedlists/glazedlists/1.11.0/)
+Download [Latest Release](https://repo1.maven.org/maven2/at/swimmesberger/glazedlists/1.12.0/)
 
 Configure [Maven](http://www.glazedlists.com/Home/maven)
 
