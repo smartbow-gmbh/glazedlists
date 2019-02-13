@@ -23,7 +23,7 @@ Source-Version: JDK ${sourceCompatibility}
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: glazedlists
 Bundle-Name: Glazed Lists
-Bundle-SymbolicName: ca.odell.glazedlists
+Bundle-SymbolicName: at.swimmesberger.glazedlists
 Bundle-Version: ${implementationVersion}
 Bundle-ClassPath: .
 
