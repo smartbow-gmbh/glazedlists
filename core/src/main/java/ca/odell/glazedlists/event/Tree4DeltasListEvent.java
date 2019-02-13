@@ -22,7 +22,7 @@ class Tree4DeltasListEvent<E> extends ListEvent<E> {
 
     private ListEventAssembler<E> deltasAssembler;
 
-    private Tree4DeltasListEvent(ListEventAssembler<E> deltasAssembler, EventList<E> sourceList) {
+    public Tree4DeltasListEvent(ListEventAssembler<E> deltasAssembler, EventList<E> sourceList) {
         super(sourceList);
         this.deltasAssembler = deltasAssembler;
     }
