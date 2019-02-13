@@ -243,6 +243,12 @@ public abstract class ListEvent<E> extends EventObject {
     public abstract ListEvent<E> copy();
 
     /**
+     * Create a copy of this ListEvent which acts completely on it's own without
+     * external mutation.
+     */
+    public abstract ListEvent<E> deepCopy();
+
+    /**
      * Resets this event's position to the previously-marked position. This should
      * be used for {@link TransformedList}s that require multiple-passes of the
      * {@link ListEvent} in order to process it.

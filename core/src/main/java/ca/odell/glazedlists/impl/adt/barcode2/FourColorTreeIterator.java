@@ -156,6 +156,19 @@ public class FourColorTreeIterator <  T0>   {
         return result;
     }
 
+    public FourColorTreeIterator <  T0>   copyWithTree(FourColorTree<T0> tree) {
+        FourColorTreeIterator <  T0>   result = new FourColorTreeIterator <  T0>  (tree);
+
+        result.count1 = this.count1;
+        result.count2 = this.count2;
+        result.count4 = this.count4;
+        result.count8 = this.count8;
+
+        result.node = node.copy();
+        result.index = index;
+        return result;
+    }
+
     /**
      * @return <code>true</code> if there's an element of the specified color in
      *     this tree following the current element.

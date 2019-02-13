@@ -2,6 +2,8 @@
 /* http://glazedlists.com/                                                     */
 package ca.odell.glazedlists.impl.adt;
 
+import java.util.Arrays;
+
 /**
  * Simple implementation of an array list suitable for storage of primitive integers.
  *
@@ -29,6 +31,13 @@ public class IntArrayList {
 		data = new int[ initial_capacity ];
 	}
 
+	public IntArrayList( IntArrayList source ) {
+		data = source.toArray();
+	}
+
+	public int[] toArray() {
+		return Arrays.copyOf(data, size);
+	}
 
 	/**
 	 * Returns the number of entries in the list.

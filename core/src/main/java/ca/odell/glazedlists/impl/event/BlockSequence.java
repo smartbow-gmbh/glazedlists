@@ -10,6 +10,7 @@ import ca.odell.glazedlists.impl.adt.IntArrayList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Manage a very simple list of list event blocks that occur in
@@ -18,13 +19,24 @@ import java.util.List;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class BlockSequence<E> {
-
     /** the start indices of the change blocks, inclusive */
-    private IntArrayList starts = new IntArrayList();
+    private final IntArrayList starts;
     /** the change types */
-    private IntArrayList types = new IntArrayList();
+    private final IntArrayList types;
     /** the impacted values */
-    private List<List<ObjectChange<E>>> values = new ArrayList<>();
+    private final List<List<ObjectChange<E>>> values;
+
+    public BlockSequence(){
+        this.starts = new IntArrayList();
+        this.types = new IntArrayList();
+        this.values = new ArrayList<>();
+    }
+
+    private BlockSequence(BlockSequence sequence){
+        this.starts = new IntArrayList(sequence.starts);
+        this.types = new IntArrayList(sequence.types);
+        this.values = new ArrayList<>(sequence.values);
+    }
 
     /**
      * @param startIndex the first updated element, inclusive
@@ -120,8 +132,8 @@ public class BlockSequence<E> {
         values.clear();
     }
 
-    public Iterator iterator() {
-        return new Iterator();
+    public Iterator<E> iterator() {
+        return new Iterator<>(this);
     }
 
     /** {@inheritDoc} */
@@ -155,7 +167,8 @@ public class BlockSequence<E> {
     /**
      * Iterate through the list of changes in this sequence.
      */
-    public class Iterator {
+    public static class Iterator<E> {
+        private final BlockSequence<E> source;
 
         private int blockIndex = -1;
         private int offset = 0;
@@ -166,14 +179,19 @@ public class BlockSequence<E> {
 
         private List<ObjectChange<E>> blockChanges = null;
 
-        public Iterator copy() {
-            Iterator result = new Iterator();
-            result.blockIndex = blockIndex;
-            result.offset = offset;
-            result.startIndex = startIndex;
-            result.endIndex = endIndex;
-            result.type = type;
-            result.blockChanges = blockChanges;
+        public Iterator(BlockSequence<E> source){
+            this.source = Objects.requireNonNull(source);
+        }
+
+        public Iterator<E> copy() {
+            Iterator<E> result = new Iterator<>(this.source);
+            this.copy(result);
+            return result;
+        }
+
+        public Iterator<E> deepCopy(){
+            Iterator<E> result = new Iterator<>(new BlockSequence<>(this.source));
+            this.copy(result);
             return result;
         }
 
@@ -233,13 +251,13 @@ public class BlockSequence<E> {
                 return true;
 
                 // increment to the next block
-            } else if(blockIndex + 1 < types.size()) {
+            } else if(blockIndex + 1 < source.types.size()) {
                 blockIndex++;
                 offset = 0;
-                startIndex = starts.get(blockIndex);
-                blockChanges = Collections.unmodifiableList(values.get(blockIndex));
+                startIndex = source.starts.get(blockIndex);
+                blockChanges = Collections.unmodifiableList(source.values.get(blockIndex));
                 endIndex = startIndex + blockChanges.size();
-                type = types.get(blockIndex);
+                type = source.types.get(blockIndex);
                 return true;
 
                 // no more left
@@ -253,14 +271,14 @@ public class BlockSequence<E> {
          */
         public boolean nextBlock() {
             // increment to the next block
-            if(blockIndex + 1 < types.size()) {
+            if(blockIndex + 1 < source.types.size()) {
                 blockIndex++;
                 offset = 0;
-                startIndex = starts.get(blockIndex);
-                blockChanges = Collections.unmodifiableList(values.get(blockIndex));
+                startIndex = source.starts.get(blockIndex);
+                blockChanges = Collections.unmodifiableList(source.values.get(blockIndex));
                 endIndex = startIndex + blockChanges.size();
-                type = types.get(blockIndex);
-                blockChanges = values.get(blockIndex);
+                type = source.types.get(blockIndex);
+                blockChanges = source.values.get(blockIndex);
                 return true;
 
                 // no more left
@@ -277,7 +295,7 @@ public class BlockSequence<E> {
             if(offset + 1 < endIndex - startIndex) return true;
 
             // increment to the next block
-            if(blockIndex + 1 < types.size()) return true;
+            if(blockIndex + 1 < source.types.size()) return true;
 
             // no more left
             return false;
@@ -288,10 +306,19 @@ public class BlockSequence<E> {
          */
         public boolean hasNextBlock() {
             // increment to the next block
-            if(blockIndex + 1 < types.size()) return true;
+            if(blockIndex + 1 < source.types.size()) return true;
 
             // no more left
             return false;
+        }
+
+        private void copy(Iterator<E> it) {
+            it.blockIndex = this.blockIndex;
+            it.offset = this.offset;
+            it.startIndex = this.startIndex;
+            it.endIndex = this.endIndex;
+            it.type = this.type;
+            it.blockChanges = this.blockChanges;
         }
     }
 }

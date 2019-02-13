@@ -235,7 +235,7 @@ public class Tree4Deltas<E> {
      * Add all the specified changes to this.
      */
     public void addAll(BlockSequence<E> blocks) {
-        for (BlockSequence<E>.Iterator i = blocks.iterator(); i.nextBlock(); ) {
+        for (BlockSequence.Iterator<E> i = blocks.iterator(); i.nextBlock(); ) {
             int blockStart = i.getBlockStart();
             int type = i.getType();
             List<ObjectChange<E>> blockChanges = i.getBlockChanges();
@@ -279,6 +279,12 @@ public class Tree4Deltas<E> {
 
         public Iterator<E> copy() {
             return new Iterator<>(tree, treeIterator.copy());
+        }
+
+        public Iterator<E> deepCopy(){
+            FourColorTree<ObjectChange<E>> copy = this.tree.copy();
+            FourColorTreeIterator<ObjectChange<E>> iterator = this.treeIterator.copyWithTree(copy);
+            return new Iterator<>(copy, iterator);
         }
 
         public int getIndex() {

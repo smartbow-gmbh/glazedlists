@@ -139,6 +139,12 @@ public class FourColorTree <  T0>   {
         this(  coder,    (Comparator)GlazedLists.comparableComparator());
     }
 
+    public FourColorTree<T0> copy(){
+        FourColorTree<T0> copy = new FourColorTree<>(this.coder, this.comparator);
+        copy.root = this.root == null ? null : this.root.copy();
+        copy.zeroQueue.addAll(this.zeroQueue);
+        return copy;
+    }
 
     public ListToByteCoder getCoder() {
         return coder;

@@ -17,12 +17,12 @@ import java.util.List;
  */
 class Tree4DeltasListEvent<E> extends ListEvent<E> {
 
-    private Tree4Deltas.Iterator deltasIterator;
-    private BlockSequence.Iterator linearIterator;
+    private Tree4Deltas.Iterator<E> deltasIterator;
+    private BlockSequence.Iterator<E> linearIterator;
 
-    private ListEventAssembler deltasAssembler;
+    private ListEventAssembler<E> deltasAssembler;
 
-    public Tree4DeltasListEvent(ListEventAssembler deltasAssembler, EventList<E> sourceList) {
+    private Tree4DeltasListEvent(ListEventAssembler<E> deltasAssembler, EventList<E> sourceList) {
         super(sourceList);
         this.deltasAssembler = deltasAssembler;
     }
@@ -36,6 +36,19 @@ class Tree4DeltasListEvent<E> extends ListEvent<E> {
         result.deltasIterator = deltasIterator != null ? deltasIterator.copy() : null;
         result.linearIterator = linearIterator != null ? linearIterator.copy() : null;
         result.deltasAssembler = deltasAssembler;
+        return result;
+    }
+
+    /**
+     * Create a deep copy of this list event.
+     */
+    @Override
+    public ListEvent<E> deepCopy() {
+        ListEventAssembler<E> newAssembler = deltasAssembler.newAssembler();
+        Tree4DeltasListEvent<E> result = new Tree4DeltasListEvent<>(newAssembler, sourceList);
+        result.deltasIterator = deltasIterator != null ? deltasIterator.deepCopy() : null;
+        result.linearIterator = linearIterator != null ? linearIterator.deepCopy() : null;
+        result.deltasAssembler = newAssembler;
         return result;
     }
 
@@ -113,18 +126,18 @@ class Tree4DeltasListEvent<E> extends ListEvent<E> {
     @Override
     public E getOldValue() {
         if(linearIterator != null) {
-            return (E)linearIterator.getOldValue();
+            return linearIterator.getOldValue();
         } else {
-            return (E)deltasIterator.getOldValue();
+            return deltasIterator.getOldValue();
         }
     }
 
     @Override
     public E getNewValue() {
         if(linearIterator != null) {
-            return (E)linearIterator.getNewValue();
+            return linearIterator.getNewValue();
         } else {
-            return (E)deltasIterator.getNewValue();
+            return deltasIterator.getNewValue();
         }
     }
 

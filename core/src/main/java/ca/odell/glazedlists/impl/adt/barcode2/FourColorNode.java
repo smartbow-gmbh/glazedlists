@@ -142,6 +142,20 @@ class  FourColorNode <  T0>   implements Element<T0> {
 
     }
 
+    public FourColorNode<T0> copy(){
+        FourColorNode<T0> parentNode = this.parent == null ? null : this.parent.copy();
+        FourColorNode<T0> node = new FourColorNode<T0>(this.color, this.size, this.t0, parentNode);
+        node.count1 = this.count1;
+        node.count2 = this.count2;
+        node.count4 = this.count4;
+        node.count8 = this.count8;
+        node.height = this.height;
+        node.left = this.left == null ? null : this.left.copy();
+        node.right = this.right == null ? null : this.right.copy();
+        node.sorted = this.sorted;
+        return node;
+    }
+
     /**
      * Get the value of this element.
      */

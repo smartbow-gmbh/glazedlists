@@ -411,10 +411,26 @@ public final class ListEventAssembler<E> {
         return newEvent;
     }
 
-    // these method sare used by the ListEvent
+    /**
+     * Returns the uncommited changes of the current event level
+     * @return
+     */
+    public ListEvent<E> getCurrentChanges(){
+        return this.listEvent.deepCopy();
+    }
+
+    public ListEvent<E> emptyEvent() {
+        return new Tree4DeltasListEvent<>(this.newAssembler(), this.sourceList);
+    }
+
+    public ListEventAssembler<E> newAssembler(){
+        return new ListEventAssembler<>(this.sourceList, this.publisher);
+    }
+
+    // these methods are used by the ListEvent
     boolean getUseListBlocksLinear() { return useListBlocksLinear; }
-    Tree4Deltas getListDeltas() { return listDeltas; }
-    BlockSequence getListBlocksLinear() { return blockSequence; }
+    Tree4Deltas<E> getListDeltas() { return listDeltas; }
+    BlockSequence<E> getListBlocksLinear() { return blockSequence; }
     int[] getReorderMap() { return reorderMap; }
 
     /**
