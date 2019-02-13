@@ -203,6 +203,7 @@ nexusStaging {
     packageGroup = group
     username = sonatypeUsername
     password = sonatypePassword
+    stagingProfileId = "82c083afad913c"
 }
 
 uploadArchives {
