@@ -13,3 +13,7 @@ tools/
 *.swp
 *.DS_Store
 /deployment/signingkey.asc
+/secring.gpg
+/core/out
+/extensions/*/out
+/jmh-benchmark/out
