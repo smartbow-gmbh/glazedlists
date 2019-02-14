@@ -1,16 +1,13 @@
 package ca.odell.glazedlists;
 
-import java.util.ArrayList;
-import java.util.EventListener;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.event.ObjectChange;
 
 public class TransactionEventAssembler<E> {
   /**
@@ -28,10 +25,29 @@ public class TransactionEventAssembler<E> {
    **/
   private int nestedLevel = -1;
 
+  // all changes directly made to this EventAssembler this acts like a view
+  private final ListEventAssembler<E> updates;
+  // all changes which are commited
   private final ListEventAssembler<E> bufferedUpdates;
 
+  public TransactionEventAssembler() {
+    this(true);
+  }
+
   public TransactionEventAssembler(boolean rollbackSupport) {
-    this.bufferedUpdates = new ListEventAssembler<>(null, ListEventAssembler.createListEventPublisher());
+    this(new BasicEventList<>(), rollbackSupport);
+  }
+
+  public TransactionEventAssembler(EventList<E> source) {
+    this(source, true);
+  }
+
+  public TransactionEventAssembler(EventList<E> source, boolean rollbackSupport) {
+    this.updates = new ListEventAssembler<>(source, ListEventAssembler.createListEventPublisher());
+    this.bufferedUpdates = new ListEventAssembler<>(source, ListEventAssembler.createListEventPublisher());
+    this.updates.addListEventListener(evt -> {
+      this.bufferedUpdates.forwardEvent(evt);
+    });
     // if rollback support is requested, build the necessary infrastructure
     if (rollbackSupport) {
       this.rollbackSupport = UndoRedoSupport.install(this);
@@ -41,6 +57,170 @@ public class TransactionEventAssembler<E> {
 
   public ListEventAssembler<E> getBufferedUpdates() {
     return bufferedUpdates;
+  }
+
+  protected ListEventAssembler<E> getUpdates() {
+    return updates;
+  }
+
+  private void beforeChange(){
+    updates.beginEvent();
+  }
+
+  private void afterChange(){
+    updates.commitEvent();
+  }
+
+  /**
+   * Add to the current ListEvent the insert of the element at
+   * the specified index, with the specified previous value.
+   */
+  public void elementInserted(int index, E newValue) {
+    try {
+      beforeChange();
+      updates.elementInserted(index, newValue);
+    } finally {
+      afterChange();
+    }
+  }
+
+  /**
+   * Adds a block of insert events.
+   */
+  public void elementInserted(int index, List<E> newValues) {
+    try {
+      beforeChange();
+      updates.elementInserted(index, newValues);
+    } finally {
+      afterChange();
+    }
+  }
+  /**
+   * Add to the current ListEvent the removal of the element at the specified
+   * index, with the specified previous value.
+   */
+  public void elementDeleted(int index, E oldValue) {
+    try {
+      beforeChange();
+      updates.elementDeleted(index, oldValue);
+    } finally {
+      afterChange();
+    }
+  }
+
+  /**
+   * Adds a block of removal events
+   */
+  public void elementDeleted(int index, List<E> oldValues) {
+    try {
+      beforeChange();
+      updates.elementDeleted(index, oldValues);
+    } finally {
+      afterChange();
+    }
+  }
+
+  /**
+   * Adds a block of update events
+   */
+  public void elementUpdated(int index, List<ObjectChange<E>> changes){
+    try {
+      beforeChange();
+      updates.elementUpdated(index, changes);
+    } finally {
+      afterChange();
+    }
+  }
+
+  /**
+   * Add to the current ListEvent the update of the element at the specified
+   * index, with the specified previous value.
+   */
+  public void elementUpdated(int index, E oldValue, E newValue) {
+    try {
+      beforeChange();
+      updates.elementUpdated(index, oldValue, newValue);
+    } finally {
+      afterChange();
+    }
+  }
+
+  public void elementUpdated(int index, List<E> oldValues, List<E> newValues) {
+    try {
+      beforeChange();
+      updates.elementUpdated(index, oldValues, newValues);
+    } finally {
+      afterChange();
+    }
+  }
+
+  public void elementUpdated(int index, ObjectChange<E> change) {
+    try {
+      beforeChange();
+      updates.elementUpdated(index, change);
+    } finally {
+      afterChange();
+    }
+  }
+
+  /**
+   * Convenience method for appending a single change of the specified type.
+   */
+  public void addChange(int type, int index, ObjectChange<E> event) {
+    try {
+      beforeChange();
+      updates.addChange(type, index, event);
+    } finally {
+      afterChange();
+    }
+  }
+
+  /**
+   * Adds a block of changes to the set of list changes. The change block
+   * allows a range of changes to be grouped together for efficiency.
+   */
+  public void addChange(int type, int startIndex, List<ObjectChange<E>> changeEvents) {
+    try {
+      beforeChange();
+      updates.addChange(type, startIndex, changeEvents);
+    } finally {
+      afterChange();
+    }
+  }
+
+  /**
+   * Sets the current event as a reordering. Reordering events cannot be
+   * combined with other events.
+   */
+  public void reorder(int[] reorderMap, List<ObjectChange<E>> changes){
+    try {
+      beforeChange();
+      updates.reorder(reorderMap, changes);
+    } finally {
+      afterChange();
+    }
+  }
+
+  /**
+   * Forwards the event. This is a convenience method that does the following:
+   * <br>1. beginEvent()
+   * <br>2. For all changes in sourceEvent, apply those changes to this
+   * <br>3. commitEvent()
+   *
+   * <p>Note that this method should be preferred to manually forwarding events
+   * because it is heavily optimized.
+   *
+   * <p>Note that currently this implementation does a best effort to preserve
+   * reorderings. This means that a reordering is lost if it is combined with
+   * any other ListEvent.
+   */
+  public void forwardEvent(ListEvent<?> listChanges) {
+    try {
+      beforeChange();
+      updates.forwardEvent(listChanges);
+    } finally {
+      afterChange();
+    }
   }
 
   /**
@@ -103,14 +283,15 @@ public class TransactionEventAssembler<E> {
       throw new IllegalStateException("No ListEvent exists to roll back");
 
     // rollback all changes from the transaction as a single ListEvent
-    bufferedUpdates.beginEvent(true);
+    updates.beginEvent(true);
     try {
       this.contextLevel.undo();
     } finally {
-      bufferedUpdates.commitEvent();
+      updates.commitEvent();
     }
-    if (this.contextLevel.isEventStarted())
+    if (this.contextLevel.isEventStarted()) {
       bufferedUpdates.discardEvent();
+    }
 
     this.contextLevel = this.contextLevel.getParent();
     nestedLevel--;
@@ -127,10 +308,18 @@ public class TransactionEventAssembler<E> {
   }
 
   public void addListEventListener(ListEventListener<? super E> listChangeListener) {
-    this.bufferedUpdates.addListEventListener(listChangeListener);
+    this.updates.addListEventListener(listChangeListener);
   }
 
   public void removeListEventListener(ListEventListener<? super E> listChangeListener) {
+    this.updates.removeListEventListener(listChangeListener);
+  }
+
+  public void addBufferedListEventListener(ListEventListener<? super E> listChangeListener) {
+    this.bufferedUpdates.addListEventListener(listChangeListener);
+  }
+
+  public void removeBufferedListEventListener(ListEventListener<? super E> listChangeListener) {
     this.bufferedUpdates.removeListEventListener(listChangeListener);
   }
 
@@ -139,15 +328,9 @@ public class TransactionEventAssembler<E> {
    */
   private class RollbackSupportListener implements UndoRedoSupport.Listener {
     public void undoableEditHappened(UndoRedoSupport.Edit edit) {
-      boolean noContext = nestedLevel < 0;
-      if (noContext) {
-        bufferedUpdates.beginEvent();
-      }
       // if a tx context exists we are in the middle of a transaction
-      contextLevel.add(edit);
-      if (noContext) {
-        bufferedUpdates.commitEvent();
-      }
+      if(contextLevel != null)
+        contextLevel.add(edit);
     }
   }
 
@@ -257,7 +440,7 @@ public class TransactionEventAssembler<E> {
   public static final class UndoRedoSupport<E> {
 
     /** A wrapper around the true source EventList provides control over the granularity of ListEvents it produces. */
-    private TransactionEventAssembler<E> txSource;
+    private ListEventAssembler<E> txSource;
 
     /** A ListEventListener that watches the {@link #txSource} and in turn broadcasts an {@link Edit} object to all {@link Listener}s */
     private ListEventListener<E> txSourceListener = new TXSourceListener();
@@ -271,7 +454,7 @@ public class TransactionEventAssembler<E> {
      */
     private int ignoreListEvent = 0;
 
-    private UndoRedoSupport(TransactionEventAssembler<E> source) {
+    private UndoRedoSupport(ListEventAssembler<E> source) {
       // build a TransactionList that does NOT support rollback - we don't
       // need it and it relies on UndoRedoSupport, so we would have
       this.txSource = Objects.requireNonNull(source);
@@ -320,7 +503,7 @@ public class TransactionEventAssembler<E> {
      * @return an instance of UndoRedoSupport through which the undo/redo behaviour can be customized
      */
     public static <E> UndoRedoSupport<E> install(TransactionEventAssembler<E> source) {
-      return new UndoRedoSupport<>(source);
+      return new UndoRedoSupport<>(source.updates);
     }
 
     /**
@@ -354,13 +537,13 @@ public class TransactionEventAssembler<E> {
           // provide an AddEdit to the CompositeEdit
           if (changeType == ListEvent.INSERT) {
             final E inserted = listChanges.getNewValue();
-            edit.add(new AddEdit(txSource.getBufferedUpdates(), changeIndex, inserted));
+            edit.add(new AddEdit(txSource, changeIndex, inserted));
 
             // provide a RemoveEdit to the CompositeEdit
           } else if (changeType == ListEvent.DELETE) {
             // try to get the previous value through the ListEvent
             E deleted = listChanges.getOldValue();
-            edit.add(new RemoveEdit(txSource.getBufferedUpdates(), changeIndex, deleted));
+            edit.add(new RemoveEdit(txSource, changeIndex, deleted));
             // provide an UpdateEdit to the CompositeEdit
           } else if (changeType == ListEvent.UPDATE) {
             final E previousValue = listChanges.getOldValue();
@@ -368,7 +551,7 @@ public class TransactionEventAssembler<E> {
 
             // if a different object is present at the index
             if (newValue != previousValue) {
-              edit.add(new UpdateEdit(txSource.getBufferedUpdates(), changeIndex, newValue, previousValue));
+              edit.add(new UpdateEdit(txSource, changeIndex, newValue, previousValue));
             }
           }
         }

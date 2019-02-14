@@ -3,16 +3,15 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.event;
 
+import ca.odell.glazedlists.AbstractEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.impl.Preconditions;
 import ca.odell.glazedlists.impl.WeakReferenceProxy;
 import ca.odell.glazedlists.impl.event.BlockSequence;
 import ca.odell.glazedlists.impl.event.Tree4Deltas;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.ConcurrentModificationException;
-import java.util.List;
+import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Models a continuous stream of changes on a list. Changes of the same type
@@ -445,6 +444,78 @@ public final class ListEventAssembler<E> {
         listDeltas.setAllowContradictingEvents(false);
         // force cleanup of iterator which still could reference old data
         listEvent.reset();
+    }
+
+    public static <T> void applyListEvent(final ListEvent<T> event, final List<T> target) {
+        applyListEvent(event, target, null);
+    }
+
+    public static <T> void applyListEvent(final ListEvent<T> event, final List<T> target, final ListEventAssembler<T> targetAssembler) {
+        EventTransactionable<T> eventTransactionable = findTransactionable(target);
+        if(eventTransactionable == null && targetAssembler != null && target instanceof EventList){
+            eventTransactionable = EventTransactionable.create((EventList<T>)target, targetAssembler);
+        }
+
+        final ApplyListEventConsumer<T> consumer = new ApplyListEventConsumer<>(event);
+        if(eventTransactionable != null){
+            eventTransactionable.transaction(consumer.eventListConsumer());
+        }else{
+            consumer.accept(target);
+        }
+    }
+
+    private static <T> void applyEvent(ListEvent<T> event, EventList<T> list){
+
+    }
+
+    private static <T> EventTransactionable<T> findTransactionable(List<T> list){
+        if(list instanceof EventTransactionable == false){
+            return null;
+        }
+        return (EventTransactionable<T>)list;
+    }
+
+    private static class ApplyListEventConsumer<T> implements Consumer<List<T>>{
+        private final ListEvent<T> event;
+        private final Consumer<EventList<T>> evConsumer;
+
+        public ApplyListEventConsumer(ListEvent<T> event){
+            this.event = Objects.requireNonNull(event);
+            this.evConsumer = evList -> {
+              this.accept(evList);
+            };
+        }
+
+        public Consumer<EventList<T>> eventListConsumer(){
+            return this.evConsumer;
+        }
+
+        @Override
+        public void accept(List<T> target) {
+            // update the target list with the EventList
+            while (event.next()) {
+                int index = event.getIndex();
+                int type = event.getType();
+
+                if (type == ListEvent.INSERT) {
+                    safeAdd(target, index, event.getNewValue());
+                } else if (type == ListEvent.UPDATE) {
+                    final T newValue = event.getNewValue();
+                    target.set(index, newValue);
+                } else if (type == ListEvent.DELETE) {
+                    target.remove(index);
+                }
+            }
+        }
+
+        private static <T> void safeAdd(List<T> target, int index, T value) {
+            while (target.size() < index) {
+                target.add(null);
+            }
+            if (target.size() > index && target.get(index) == null)
+                target.remove(index);
+            target.add(index, value);
+        }
     }
 
     /**

@@ -81,19 +81,45 @@ public class BlockSequence<E> {
         int lastStartIndex;
         int lastEndIndex;
         int lastChangedIndex;
+        int lastValuesIndex;
         int size = types.size();
         List<ObjectChange<E>> lastChange;
         if(size == 0) {
             lastType = -1;
             lastStartIndex = -1;
+            lastChange = null;
             lastEndIndex = 0;
             lastChangedIndex = 0;
+            lastValuesIndex = -1;
         } else {
-            lastType = types.get(size - 1);
-            lastStartIndex = starts.get(size - 1);
-            lastChange = values.get(size-1);
+            lastValuesIndex = size - 1;
+            lastType = types.get(lastValuesIndex);
+            lastStartIndex = starts.get(lastValuesIndex);
+            lastChange = values.get(lastValuesIndex);
             lastEndIndex = lastStartIndex + lastChange.size();
             lastChangedIndex = (lastType == ListEvent.DELETE) ? lastStartIndex : lastEndIndex;
+        }
+
+        // special case for updates to the last change (which is a common usecase) everything else we handle via the more powerful Tree4Delta
+        if(lastType == ListEvent.UPDATE && changeType == ListEvent.UPDATE && lastStartIndex <= startIndex){
+            int newEndIndex = startIndex + events.size();
+            if(lastEndIndex >= newEndIndex) {
+                int diffStart = startIndex - lastStartIndex;
+                int diffEnd = lastEndIndex - newEndIndex + 1;
+                List<ObjectChange<E>> copyUpdate;
+                if(diffStart == 0 && diffEnd == lastChange.size()){
+                    // replace all
+                    copyUpdate = events;
+                }else{
+                    // replace subregion
+                    copyUpdate = new ArrayList<>(lastChange);
+                    for(int i = diffStart; i<diffEnd; i++){
+                        copyUpdate.set(i, events.get(i));
+                    }
+                }
+                values.set(lastValuesIndex, copyUpdate);
+                return true;
+            }
         }
 
         // this change breaks the linear-ordering requirement, convert

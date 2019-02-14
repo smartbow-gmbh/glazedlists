@@ -4,6 +4,7 @@
 package ca.odell.glazedlists;
 
 // the Glazed Lists' change objects
+import ca.odell.glazedlists.event.EventTransactionable;
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEventPublisher;
@@ -14,6 +15,7 @@ import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
@@ -28,7 +30,7 @@ import java.util.function.UnaryOperator;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public abstract class AbstractEventList<E> implements EventList<E> {
+public abstract class AbstractEventList<E> implements EventList<E>, EventTransactionable<E> {
 
     /** the change event and notification system */
     protected ListEventAssembler<E> updates = null;
@@ -70,6 +72,16 @@ public abstract class AbstractEventList<E> implements EventList<E> {
     @Override
     public ReadWriteLock getReadWriteLock() {
         return readWriteLock;
+    }
+
+    @Override
+    public void transaction(Consumer<EventList<E>> consumer) {
+        this.updates.beginEvent(true);
+        try{
+            consumer.accept(this);
+        }finally {
+            this.updates.commitEvent();
+        }
     }
 
     /** {@inheritDoc} */

@@ -54,6 +54,8 @@ public class Tree4Deltas<E> {
     private boolean initialCapacityKnown = false;
 
     public boolean horribleHackPreferMostRecentValue = false;
+    /** Allow dynamically setting size of the tree according to the incoming events **/
+    public boolean dynamicSizing = true;
 
     public boolean getAllowContradictingEvents() {
         return allowContradictingEvents;
@@ -83,20 +85,24 @@ public class Tree4Deltas<E> {
                 tree.add(startIndex, TARGET_INDICES, INSERT, newChange, 1);
             } else if (changeType == ListEvent.UPDATE) {
                 final int overallIndex = tree.convertIndexColor(i, TARGET_INDICES, ALL_INDICES);
-                Element<ObjectChange<E>> standingChangeToIndex = tree.get(overallIndex, ALL_INDICES);
-                if (horribleHackPreferMostRecentValue) {
-                    byte newColor = standingChangeToIndex.getColor() == INSERT ? INSERT : UPDATE;
-                    tree.set(overallIndex, ALL_INDICES, newColor, newChange, 1);
-                } else {
-                    if (standingChangeToIndex.getColor() == INSERT) {
-                        // when updating a insert the original insert stands with the new updated value
-                        tree.set(overallIndex, ALL_INDICES, INSERT, ObjectChange.create(ListEvent.unknownValue(), newChange.getNewValue()), 1);
-                    } else if (standingChangeToIndex.getColor() == UPDATE) {
-                        // if we're updating an update, the original replaced value stands.
-                        tree.set(overallIndex, ALL_INDICES, UPDATE, ObjectChange.create(standingChangeToIndex.get().getOldValue(), newChange.getNewValue()), 1);
+                if(tree.size(ALL_INDICES) <= 0){
+                    tree.add(overallIndex, ALL_INDICES, UPDATE, newChange, 1);
+                }else {
+                    Element<ObjectChange<E>> standingChangeToIndex = tree.get(overallIndex, ALL_INDICES);
+                    if (horribleHackPreferMostRecentValue) {
+                        byte newColor = standingChangeToIndex.getColor() == INSERT ? INSERT : UPDATE;
+                        tree.set(overallIndex, ALL_INDICES, newColor, newChange, 1);
                     } else {
-                        // apply the update to our change description
-                        tree.set(overallIndex, ALL_INDICES, UPDATE, newChange, 1);
+                        if (standingChangeToIndex.getColor() == INSERT) {
+                            // when updating a insert the original insert stands with the new updated value
+                            tree.set(overallIndex, ALL_INDICES, INSERT, ObjectChange.create(ListEvent.unknownValue(), newChange.getNewValue()), 1);
+                        } else if (standingChangeToIndex.getColor() == UPDATE) {
+                            // if we're updating an update, the original replaced value stands.
+                            tree.set(overallIndex, ALL_INDICES, UPDATE, ObjectChange.create(standingChangeToIndex.get().getOldValue(), newChange.getNewValue()), 1);
+                        } else {
+                            // apply the update to our change description
+                            tree.set(overallIndex, ALL_INDICES, UPDATE, newChange, 1);
+                        }
                     }
                 }
             } else if (changeType == ListEvent.DELETE) {
@@ -216,7 +222,7 @@ public class Tree4Deltas<E> {
 
     public void reset(int size) {
         tree.clear();
-        initialCapacityKnown = true;
+        initialCapacityKnown = dynamicSizing ? false : true;
         ensureCapacity(size);
     }
 
