@@ -31,12 +31,12 @@ public class TransactionEventAssembler<E> {
   private final ListEventAssembler<E> bufferedUpdates;
 
   public TransactionEventAssembler(boolean rollbackSupport) {
+    this.bufferedUpdates = new ListEventAssembler<>(null, ListEventAssembler.createListEventPublisher());
     // if rollback support is requested, build the necessary infrastructure
     if (rollbackSupport) {
       this.rollbackSupport = UndoRedoSupport.install(this);
       this.rollbackSupport.addUndoSupportListener(new RollbackSupportListener());
     }
-    this.bufferedUpdates = new ListEventAssembler<>(null, ListEventAssembler.createListEventPublisher());
   }
 
   public ListEventAssembler<E> getBufferedUpdates() {
