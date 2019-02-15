@@ -7,10 +7,7 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ObjectChange;
 import ca.odell.glazedlists.impl.adt.IntArrayList;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Manage a very simple list of list event blocks that occur in
@@ -25,17 +22,21 @@ public class BlockSequence<E> {
     private final IntArrayList types;
     /** the impacted values */
     private final List<List<ObjectChange<E>>> values;
+    /** internal handlers for overwriting existing blocks out of order */
+    private final List<OverwriteBlockHandler> overwriteBlockHandlers;
 
     public BlockSequence(){
         this.starts = new IntArrayList();
         this.types = new IntArrayList();
         this.values = new ArrayList<>();
+        this.overwriteBlockHandlers = Arrays.asList(new UpdateOverwriteBlockHandler());
     }
 
     private BlockSequence(BlockSequence sequence){
         this.starts = new IntArrayList(sequence.starts);
         this.types = new IntArrayList(sequence.types);
         this.values = new ArrayList<>(sequence.values);
+        this.overwriteBlockHandlers = new ArrayList<>(sequence.overwriteBlockHandlers);
     }
 
     /**
@@ -100,26 +101,43 @@ public class BlockSequence<E> {
             lastChangedIndex = (lastType == ListEvent.DELETE) ? lastStartIndex : lastEndIndex;
         }
 
-        // special case for updates to the last change (which is a common usecase) everything else we handle via the more powerful Tree4Delta
-        if(lastType == ListEvent.UPDATE && changeType == ListEvent.UPDATE && lastStartIndex <= startIndex){
-            int newEndIndex = startIndex + events.size();
-            if(lastEndIndex >= newEndIndex) {
-                int diffStart = startIndex - lastStartIndex;
-                int diffEnd = lastEndIndex - newEndIndex + 1;
-                List<ObjectChange<E>> copyUpdate;
-                if(diffStart == 0 && diffEnd == lastChange.size()){
-                    // replace all
-                    copyUpdate = events;
-                }else{
-                    // replace subregion
-                    copyUpdate = new ArrayList<>(lastChange);
-                    for(int i = diffStart; i<diffEnd; i++){
-                        copyUpdate.set(i, events.get(i));
-                    }
+        // special case for changes to the last change (which is a common usecase) handled via OverwriteBlockHandler everything else we handle via the more powerful Tree4Delta
+        if(lastType != -1 && lastStartIndex <= startIndex){
+          int newEndIndex = startIndex + events.size();
+          if(lastEndIndex >= newEndIndex) {
+            OverwriteBlockHandler blockHandler  = null;
+            for(int i = 0; i<this.overwriteBlockHandlers.size(); i++){
+              OverwriteBlockHandler tmpHandler = this.overwriteBlockHandlers.get(i);
+              if(tmpHandler.canOverwrite(lastType, changeType)){
+                blockHandler = tmpHandler;
+                break;
+              }
+            }
+            if(blockHandler != null) {
+              int diffStart = startIndex - lastStartIndex;
+              int diffEnd = lastEndIndex - newEndIndex;
+              int iStart = diffStart;
+              int iEnd = lastChange.size() - diffEnd;
+              int newIdx = 0;
+              List<ObjectChange<E>> copyUpdate = new ArrayList<>(lastChange);
+              boolean failed = false;
+              for (int i = iStart; i < iEnd; i++) {
+                ObjectChange<E> prevChange = copyUpdate.get(i);
+                ObjectChange<E> curChange = events.get(newIdx);
+                ObjectChange<E> newChange = blockHandler.overwriteEvent(lastType, changeType, prevChange, curChange);
+                if(newChange == null){
+                  failed = true;
+                  break;
                 }
+                copyUpdate.set(i, newChange);
+                newIdx++;
+              }
+              if(!failed) {
                 values.set(lastValuesIndex, copyUpdate);
                 return true;
+              }
             }
+          }
         }
 
         // this change breaks the linear-ordering requirement, convert
@@ -188,6 +206,25 @@ public class BlockSequence<E> {
         }
 
         return result.toString();
+    }
+
+    private static interface OverwriteBlockHandler {
+      boolean canOverwrite(int oldType, int newType);
+
+      <E> ObjectChange<E> overwriteEvent(int lastType, int newType, ObjectChange<E> prevChange, ObjectChange<E> curChange);
+    }
+
+    private static class UpdateOverwriteBlockHandler implements OverwriteBlockHandler {
+      @Override
+      public boolean canOverwrite(int oldType, int newType) {
+        return oldType == ListEvent.UPDATE && newType == ListEvent.UPDATE;
+      }
+
+      @Override
+      public <E> ObjectChange<E> overwriteEvent(int lastType, int newType, ObjectChange<E> prevChange, ObjectChange<E> curChange) {
+        // create new update event by merging the previous and new event
+        return ObjectChange.create(prevChange.getOldValue(), curChange.getNewValue());
+      }
     }
 
     /**

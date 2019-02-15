@@ -105,7 +105,12 @@ public class ListBlocksLinearTest {
         listBlocks = new BlockSequence();
         assertTrue(listBlocks.update(2, 4));
         assertTrue(listBlocks.update(4, 5));
-        assertFalse(listBlocks.update(4, 5));
+        // this is a special case which is allowed - update out of order of an update
+        assertTrue(listBlocks.update(2, 5));
+        assertTrue(listBlocks.update(3, 5));
+        assertTrue(listBlocks.update(2, 4));
+        assertTrue(listBlocks.update(3, 4));
+        assertTrue(listBlocks.update(2, 3));
 
         listBlocks = new BlockSequence();
         assertTrue(listBlocks.insert(2, 4));
