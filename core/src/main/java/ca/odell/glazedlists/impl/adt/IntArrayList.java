@@ -105,7 +105,9 @@ public class IntArrayList implements Cloneable {
    * @param length
    */
   public void add(final int[] elements, final int start, final int length) {
-    assert length >= 0 : "Length must be >= 0";
+    if(length < 0){
+      throw new IllegalArgumentException("Length must be >= 0");
+    }
 
     ensureBufferSpace(length);
     System.arraycopy(elements, start, this.buffer, this.elementsCount, length);
@@ -138,7 +140,7 @@ public class IntArrayList implements Cloneable {
   }
 
   public void insert(final int index, final int e1) {
-    assert (index >= 0 && index <= size()) : "Index " + index + " out of bounds [" + 0 + ", " + size() + "].";
+    this.checkRange(index);
 
     ensureBufferSpace(1);
     System.arraycopy(this.buffer, index, this.buffer, index + 1, this.elementsCount - index);
@@ -147,13 +149,12 @@ public class IntArrayList implements Cloneable {
   }
 
   public int get(final int index) {
-    assert (index >= 0 && index < size()) : "Index " + index + " out of bounds [" + 0 + ", " + size() + "[.";
-
+    this.checkRange(index);
     return ((this.buffer[index]));
   }
 
   public int set(final int index, final int e1) {
-    assert (index >= 0 && index < size()) : "Index " + index + " out of bounds [" + 0 + ", " + size() + "[.";
+    this.checkRange(index);
 
     final int v = ((this.buffer[index]));
     this.buffer[index] = e1;
@@ -161,7 +162,7 @@ public class IntArrayList implements Cloneable {
   }
 
   public int remove(final int index) {
-    assert (index >= 0 && index < size()) : "Index " + index + " out of bounds [" + 0 + ", " + size() + "[.";
+    this.checkRange(index);
 
     final int v = ((this.buffer[index]));
     if (index + 1 < this.elementsCount) {
@@ -606,6 +607,12 @@ public class IntArrayList implements Cloneable {
 
     assert this.elementsCount > 0;
     return ((this.buffer[this.elementsCount - 1]));
+  }
+
+  private void checkRange(int index){
+    if(index < 0 && index > size()){
+      throw new IndexOutOfBoundsException("Index " + index + " out of bounds [" + 0 + ", " + size() + "[.");
+    }
   }
 
   private void checkRangeBounds(final int beginIndex, final int endIndex) {

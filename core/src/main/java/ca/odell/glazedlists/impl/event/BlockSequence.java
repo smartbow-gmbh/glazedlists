@@ -44,6 +44,8 @@ public class BlockSequence<E> {
    */
   private final List<OverwriteBlockHandler> blockHandlers;
 
+  private boolean allowContradictingEvents = false;
+
   public BlockSequence() {
     this.starts = new IntArrayList();
     this.types = new IntArrayList();
@@ -56,6 +58,14 @@ public class BlockSequence<E> {
     this.types = new IntArrayList(sequence.types);
     this.values = new ArrayList<>(sequence.values);
     this.blockHandlers = new ArrayList<>(sequence.blockHandlers);
+  }
+
+  public boolean getAllowContradictingEvents() {
+    return allowContradictingEvents;
+  }
+
+  public void setAllowContradictingEvents(boolean allowContradictingEvents) {
+    this.allowContradictingEvents = allowContradictingEvents;
   }
 
   /**
@@ -221,6 +231,9 @@ public class BlockSequence<E> {
         ObjectChange<E> curChange = newEvents.get(newIdx);
         ObjectChange<E> newChange = blockHandler.overwriteEvent(lastType, changeType, prevChange, curChange);
         if (newChange == null) {
+          if (!allowContradictingEvents) {
+            throw new IllegalStateException("Remove " + i + " undoes prior " + listTypeToString(lastType) + " at the same index! Consider enabling contradicting events.");
+          }
           removeEntries = true;
         }
         copyUpdate.set(i, newChange);
@@ -288,16 +301,29 @@ public class BlockSequence<E> {
 
   //TODO: find a more generic solution but this is fast for now
   private OverwriteBlockHandler findHandler(int oldType, int newType) {
-    if(oldType == ListEvent.UPDATE && newType == ListEvent.UPDATE){
+    if (oldType == ListEvent.UPDATE && newType == ListEvent.UPDATE) {
       return this.blockHandlers.get(0);
-    } else if(oldType == ListEvent.INSERT && newType == ListEvent.DELETE){
+    } else if (oldType == ListEvent.INSERT && newType == ListEvent.DELETE) {
       return this.blockHandlers.get(1);
-    } else if(oldType == ListEvent.INSERT && newType == ListEvent.UPDATE){
+    } else if (oldType == ListEvent.INSERT && newType == ListEvent.UPDATE) {
       return this.blockHandlers.get(2);
-    } else if(oldType == ListEvent.DELETE && newType == ListEvent.INSERT){
+    } else if (oldType == ListEvent.DELETE && newType == ListEvent.INSERT) {
       return this.blockHandlers.get(3);
     }
     return null;
+  }
+
+  private String listTypeToString(int type) {
+    switch (type) {
+      case ListEvent.INSERT:
+        return "insert";
+      case ListEvent.DELETE:
+        return "delete";
+      case ListEvent.UPDATE:
+        return "update";
+      default:
+        return "unknown";
+    }
   }
 
   /**

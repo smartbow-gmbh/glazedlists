@@ -119,6 +119,7 @@ public final class ListEventAssembler<E> {
         this.allowNestedEvents = allowNestedEvents;
         if(allowNestedEvents || (eventLevel == 0 && eventThread != null)) {
             listDeltas.setAllowContradictingEvents(true);
+            blockSequence.setAllowContradictingEvents(true);
         }
 
         // prepare for a new event if we haven't already
@@ -442,6 +443,7 @@ public final class ListEventAssembler<E> {
         listDeltas.reset(sourceList.size());
         reorderMap = null;
         listDeltas.setAllowContradictingEvents(false);
+        blockSequence.setAllowContradictingEvents(false);
         // force cleanup of iterator which still could reference old data
         listEvent.reset();
     }
