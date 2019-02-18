@@ -4,6 +4,7 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ObjectChange;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.impl.adt.CircularArrayList;
@@ -485,10 +486,22 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         NodeAttacher nodeAttacher = new NodeAttacher(true);
         FinderInserter finderInserter = new FinderInserter();
 
-        if(listChanges.isReordering()){
-            // when reordering we have to split the UPDATE events into single DELETE/INSERT events
-            listChanges = updates.splitUpdates(listChanges);
+        if(listChanges.isReordering()) {
+            // when we have an update event on reorder we have to first delete all nodes and afterwards insert them
+            int removedNodes = 0;
+            while (listChanges.next()) {
+                int sourceIndex = listChanges.getIndex();
+                int type = listChanges.getType();
+                if (type == ListEvent.UPDATE) {
+                    int updatedIndex = sourceIndex - removedNodes;
+                    // when reordering we have to split the UPDATE events into single DELETE/INSERT events
+                    deleteAndDetachNode(updatedIndex, nodesToVerify);
+                    removedNodes++;
+                }
+            }
+            listChanges.reset();
         }
+
         while (listChanges.next()) {
             int sourceIndex = listChanges.getIndex();
             int type = listChanges.getType();
@@ -496,12 +509,15 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             if (type == ListEvent.INSERT) {
                 Node<E> inserted = finderInserter.findOrInsertNode(sourceIndex);
                 nodeAttacher.nodesToAttach.queueNewNodeForInserting(inserted);
-
             } else if (type == ListEvent.UPDATE) {
-                replaceAndDetachNode(sourceIndex, nodesToVerify);
-                Node<E> updated = finderInserter.findOrInsertNode(sourceIndex);
-                nodeAttacher.nodesToAttach.queueNewNodeForInserting(updated);
-
+                if(listChanges.isReordering()) {
+                    Node<E> inserted = finderInserter.findOrInsertNode(sourceIndex);
+                    nodeAttacher.nodesToAttach.queueNewNodeForInserting(inserted);
+                }else {
+                    replaceAndDetachNode(sourceIndex, nodesToVerify);
+                    Node<E> updated = finderInserter.findOrInsertNode(sourceIndex);
+                    nodeAttacher.nodesToAttach.queueNewNodeForInserting(updated);
+                }
             } else if (type == ListEvent.DELETE) {
                 deleteAndDetachNode(sourceIndex, nodesToVerify);
             }
