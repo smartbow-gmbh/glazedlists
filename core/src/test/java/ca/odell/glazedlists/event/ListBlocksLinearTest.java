@@ -117,6 +117,7 @@ public class ListBlocksLinearTest {
 
         // full block changes are allowed
         listBlocks = new BlockSequence();
+        listBlocks.setAllowContradictingEvents(true);
         assertTrue(listBlocks.insert(1, 4));
         assertTrue(listBlocks.update(1, 4));
         assertTrue(listBlocks.delete(1, 4));
@@ -128,6 +129,7 @@ public class ListBlocksLinearTest {
 
         // delete of a insert block is allowed
         listBlocks = new BlockSequence();
+        listBlocks.setAllowContradictingEvents(true);
         assertTrue(listBlocks.insert(2, 4));
         assertTrue(listBlocks.delete(3, 4));
 
