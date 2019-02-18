@@ -3,6 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
+import ca.odell.glazedlists.event.IListEventAssembler;
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
@@ -64,7 +65,7 @@ public class PluggableListTest {
         }
 
         try {
-            final EventList<String> badPublisherList = new BasicEventList<>(ListEventAssembler.createListEventPublisher(), pl.getReadWriteLock());
+            final EventList<String> badPublisherList = new BasicEventList<>(IListEventAssembler.createListEventPublisher(), pl.getReadWriteLock());
             pl.setSource(badPublisherList);
             fail("failed to throw exception on source with mismatching publisher");
         } catch (IllegalArgumentException e) {

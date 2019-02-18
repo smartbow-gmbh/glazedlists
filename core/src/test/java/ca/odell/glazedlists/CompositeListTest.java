@@ -3,6 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
+import ca.odell.glazedlists.event.IListEventAssembler;
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
@@ -216,7 +217,7 @@ public class CompositeListTest {
     @Test
     public void testPublisherAndLockConstructor() {
         final ReadWriteLock sharedLock = LockFactory.DEFAULT.createReadWriteLock();
-        final ListEventPublisher sharedPublisher = ListEventAssembler.createListEventPublisher();
+        final ListEventPublisher sharedPublisher = IListEventAssembler.createListEventPublisher();
 
         final EventList<Object> alpha = new BasicEventList<>(sharedPublisher, sharedLock);
         final EventList<Object> beta = new BasicEventList<>(sharedPublisher, sharedLock);
@@ -245,7 +246,7 @@ public class CompositeListTest {
     @Test
     public void testAddMemberList() {
         final ReadWriteLock sharedLock = LockFactory.DEFAULT.createReadWriteLock();
-        final ListEventPublisher sharedPublisher = ListEventAssembler.createListEventPublisher();
+        final ListEventPublisher sharedPublisher = IListEventAssembler.createListEventPublisher();
 
         final CompositeList<Object> uber = new CompositeList<>(sharedPublisher, sharedLock);
         final EventList<Object> alpha = new BasicEventList<>();

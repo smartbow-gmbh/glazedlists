@@ -3,6 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.hibernate;
 
+import ca.odell.glazedlists.event.IListEventAssembler;
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
 
@@ -27,7 +28,7 @@ public class EventListTypeUseListCategoryTest extends HibernateTestCase {
         final EventListType type = new EventListType();
         try {
             type.useListCategory("Test", LockFactory.DEFAULT.createReadWriteLock(),
-                    ListEventAssembler.createListEventPublisher());
+                    IListEventAssembler.createListEventPublisher());
             fail("Expected IllegalStateException");
         } catch (IllegalStateException ex) {
             // expected, because category 'Test' is already registered with different values
@@ -38,7 +39,7 @@ public class EventListTypeUseListCategoryTest extends HibernateTestCase {
         CategoryEventListFactory.clearCategoryMapping();
 
         type.useListCategory("Test", LockFactory.DEFAULT.createReadWriteLock(),
-                ListEventAssembler.createListEventPublisher());
+                IListEventAssembler.createListEventPublisher());
         type.useListCategory("Test2");
         try {
             type.useListCategory("Test2", TestEventListType2.LOCK, TestEventListType2.PUBLISHER);

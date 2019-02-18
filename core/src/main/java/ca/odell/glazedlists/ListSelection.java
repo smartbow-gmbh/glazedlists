@@ -3,10 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventAssembler;
-import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.event.ObjectChange;
+import ca.odell.glazedlists.event.*;
 import ca.odell.glazedlists.impl.adt.Barcode;
 import ca.odell.glazedlists.impl.adt.BarcodeIterator;
 import ca.odell.glazedlists.matchers.Matcher;
@@ -1205,7 +1202,7 @@ public class ListSelection<E> implements ListEventListener<E> {
         /**
          * This allows access to the EventAssembler for this list.
          */
-        public ListEventAssembler<E> updates() {
+        public IListEventAssembler<E> updates() {
             return updates;
         }
 
@@ -1304,7 +1301,7 @@ public class ListSelection<E> implements ListEventListener<E> {
         /**
          * This allows access to the EventAssembler for this list.
          */
-        public ListEventAssembler<E> updates() {
+        public IListEventAssembler<E> updates() {
             return updates;
         }
 

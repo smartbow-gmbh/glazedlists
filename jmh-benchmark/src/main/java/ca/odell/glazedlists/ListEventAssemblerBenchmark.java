@@ -1,5 +1,6 @@
 package ca.odell.glazedlists;
 
+import ca.odell.glazedlists.event.IListEventAssembler;
 import ca.odell.glazedlists.event.ListEventAssembler;
 import org.openjdk.jmh.annotations.*;
 
@@ -13,7 +14,7 @@ public class ListEventAssemblerBenchmark {
   @Setup
   public void setUp() {
     list = new BasicEventList<>();
-    assembler = new ListEventAssembler<>(list, ListEventAssembler.createListEventPublisher());
+    assembler = new ListEventAssembler<>(list, IListEventAssembler.createListEventPublisher());
   }
 
   @Benchmark

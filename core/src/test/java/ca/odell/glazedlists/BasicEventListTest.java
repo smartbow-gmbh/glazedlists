@@ -3,6 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
+import ca.odell.glazedlists.event.IListEventAssembler;
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
@@ -50,7 +51,7 @@ public class BasicEventListTest {
 		list = new BasicEventList<>(null, null);
 		assertNotNull(list.getPublisher());
 		assertNotNull(list.getReadWriteLock());
-		final ListEventPublisher publisher = ListEventAssembler.createListEventPublisher();
+		final ListEventPublisher publisher = IListEventAssembler.createListEventPublisher();
 		list = new BasicEventList<>(publisher, lock);
 		assertEquals(lock, list.getReadWriteLock());
 		assertEquals(publisher, list.getPublisher());
@@ -168,7 +169,7 @@ public class BasicEventListTest {
     public void testSerializableLocksAndPublisher() throws IOException, ClassNotFoundException {
         // 1. create the Lock and Publisher that will be shared by all BasicEventLists
         final ReadWriteLock sharedLock = LockFactory.DEFAULT.createReadWriteLock();
-        final ListEventPublisher sharedPublisher = ListEventAssembler.createListEventPublisher();
+        final ListEventPublisher sharedPublisher = IListEventAssembler.createListEventPublisher();
 
         // 2. add 4 BasicEventLists to a container, each of which shares a common Publisher and ReadWriteLocks
         final List<EventList<String>> serializationContainer = new ArrayList<>();

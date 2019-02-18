@@ -5,6 +5,7 @@ package ca.odell.glazedlists.hibernate;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.event.IListEventAssembler;
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
@@ -133,7 +134,7 @@ public final class CategoryEventListFactory implements EventListFactory {
 
         ListInfo() {
             lock = LockFactory.DEFAULT.createReadWriteLock();
-            publisher = ListEventAssembler.createListEventPublisher();
+            publisher = IListEventAssembler.createListEventPublisher();
         }
         ListInfo(ReadWriteLock lock, ListEventPublisher publisher) {
             this.lock = lock;

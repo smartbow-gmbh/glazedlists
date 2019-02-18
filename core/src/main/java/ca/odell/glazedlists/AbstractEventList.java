@@ -4,10 +4,7 @@
 package ca.odell.glazedlists;
 
 // the Glazed Lists' change objects
-import ca.odell.glazedlists.event.EventTransactionable;
-import ca.odell.glazedlists.event.ListEventAssembler;
-import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.event.ListEventPublisher;
+import ca.odell.glazedlists.event.*;
 import ca.odell.glazedlists.impl.EventListIterator;
 import ca.odell.glazedlists.impl.SimpleIterator;
 import ca.odell.glazedlists.impl.SubEventList;
@@ -33,7 +30,7 @@ import java.util.function.UnaryOperator;
 public abstract class AbstractEventList<E> implements EventList<E>, EventTransactionable<E> {
 
     /** the change event and notification system */
-    protected ListEventAssembler<E> updates = null;
+    protected IListEventAssembler<E> updates = null;
 
     /** the read/write lock provides mutual exclusion to access */
     protected ReadWriteLock readWriteLock = null;
@@ -49,9 +46,9 @@ public abstract class AbstractEventList<E> implements EventList<E>, EventTransac
      *      then a new {@link ListEventPublisher} will be created.
      */
     protected AbstractEventList(ListEventPublisher publisher) {
-        if(publisher == null) publisher = ListEventAssembler.createListEventPublisher();
+        if(publisher == null) publisher = IListEventAssembler.createListEventPublisher();
         this.publisher = publisher;
-        updates = new ListEventAssembler<>(this, publisher);
+        this.updates = this.createListEventAssembler();
     }
 
     /**
@@ -515,6 +512,10 @@ public abstract class AbstractEventList<E> implements EventList<E>, EventTransac
             }
         }
         updates.commitEvent();
+    }
+
+    protected IListEventAssembler<E> createListEventAssembler(){
+        return new ListEventAssembler<>(this, this.publisher);
     }
 
     /**

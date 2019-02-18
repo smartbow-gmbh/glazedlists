@@ -3,6 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
+import ca.odell.glazedlists.event.IListEventAssembler;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ObjectChange;
@@ -354,7 +355,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
         // ListEventAssembler, which is available if the list extends AbstractEventList.
         // Otherwise, things will work fine, but there will be multiple events dispatched
         // for a single remove operation.
-        ListEventAssembler<?> sourceUpdates;
+        IListEventAssembler<?> sourceUpdates;
         if (source instanceof AbstractEventList) {
             sourceUpdates = ((AbstractEventList) source).updates;
         }

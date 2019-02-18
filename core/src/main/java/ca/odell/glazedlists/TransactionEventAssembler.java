@@ -4,12 +4,9 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventAssembler;
-import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.event.ObjectChange;
+import ca.odell.glazedlists.event.*;
 
-public class TransactionEventAssembler<E> {
+public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
   /**
    * produces {@link UndoRedoSupport.Edit}s which are collected during a transaction to support rollback
    */
@@ -43,8 +40,8 @@ public class TransactionEventAssembler<E> {
   }
 
   public TransactionEventAssembler(EventList<E> source, boolean rollbackSupport) {
-    this.updates = new ListEventAssembler<>(source, ListEventAssembler.createListEventPublisher());
-    this.bufferedUpdates = new ListEventAssembler<>(source, ListEventAssembler.createListEventPublisher());
+    this.updates = new ListEventAssembler<>(source, IListEventAssembler.createListEventPublisher());
+    this.bufferedUpdates = new ListEventAssembler<>(source, IListEventAssembler.createListEventPublisher());
     this.updates.addListEventListener(evt -> {
       this.bufferedUpdates.forwardEvent(evt);
     });
@@ -53,6 +50,31 @@ public class TransactionEventAssembler<E> {
       this.rollbackSupport = UndoRedoSupport.install(this);
       this.rollbackSupport.addUndoSupportListener(new RollbackSupportListener());
     }
+  }
+
+  @Override
+  public boolean isEventInProgress() {
+    return false;
+  }
+
+  @Override
+  public boolean isEventEmpty() {
+    return false;
+  }
+
+  @Override
+  public ListEvent<E> getCurrentChanges() {
+    return null;
+  }
+
+  @Override
+  public ListEvent<E> emptyEvent() {
+    return updates.emptyEvent();
+  }
+
+  @Override
+  public ListEventAssembler<E> newAssembler() {
+    return updates.newAssembler();
   }
 
   public ListEventAssembler<E> getBufferedUpdates() {
@@ -75,6 +97,7 @@ public class TransactionEventAssembler<E> {
    * Add to the current ListEvent the insert of the element at
    * the specified index, with the specified previous value.
    */
+  @Override
   public void elementInserted(int index, E newValue) {
     try {
       beforeChange();
@@ -87,6 +110,7 @@ public class TransactionEventAssembler<E> {
   /**
    * Adds a block of insert events.
    */
+  @Override
   public void elementInserted(int index, List<E> newValues) {
     try {
       beforeChange();
@@ -99,6 +123,7 @@ public class TransactionEventAssembler<E> {
    * Add to the current ListEvent the removal of the element at the specified
    * index, with the specified previous value.
    */
+  @Override
   public void elementDeleted(int index, E oldValue) {
     try {
       beforeChange();
@@ -111,6 +136,7 @@ public class TransactionEventAssembler<E> {
   /**
    * Adds a block of removal events
    */
+  @Override
   public void elementDeleted(int index, List<E> oldValues) {
     try {
       beforeChange();
@@ -123,6 +149,7 @@ public class TransactionEventAssembler<E> {
   /**
    * Adds a block of update events
    */
+  @Override
   public void elementUpdated(int index, List<ObjectChange<E>> changes){
     try {
       beforeChange();
@@ -136,6 +163,7 @@ public class TransactionEventAssembler<E> {
    * Add to the current ListEvent the update of the element at the specified
    * index, with the specified previous value.
    */
+  @Override
   public void elementUpdated(int index, E oldValue, E newValue) {
     try {
       beforeChange();
@@ -145,6 +173,7 @@ public class TransactionEventAssembler<E> {
     }
   }
 
+  @Override
   public void elementUpdated(int index, List<E> oldValues, List<E> newValues) {
     try {
       beforeChange();
@@ -154,6 +183,7 @@ public class TransactionEventAssembler<E> {
     }
   }
 
+  @Override
   public void elementUpdated(int index, ObjectChange<E> change) {
     try {
       beforeChange();
@@ -166,6 +196,7 @@ public class TransactionEventAssembler<E> {
   /**
    * Convenience method for appending a single change of the specified type.
    */
+  @Override
   public void addChange(int type, int index, ObjectChange<E> event) {
     try {
       beforeChange();
@@ -179,6 +210,7 @@ public class TransactionEventAssembler<E> {
    * Adds a block of changes to the set of list changes. The change block
    * allows a range of changes to be grouped together for efficiency.
    */
+  @Override
   public void addChange(int type, int startIndex, List<ObjectChange<E>> changeEvents) {
     try {
       beforeChange();
@@ -192,6 +224,7 @@ public class TransactionEventAssembler<E> {
    * Sets the current event as a reordering. Reordering events cannot be
    * combined with other events.
    */
+  @Override
   public void reorder(int[] reorderMap, List<ObjectChange<E>> changes){
     try {
       beforeChange();
@@ -214,6 +247,7 @@ public class TransactionEventAssembler<E> {
    * reorderings. This means that a reordering is lost if it is combined with
    * any other ListEvent.
    */
+  @Override
   public void forwardEvent(ListEvent<?> listChanges) {
     try {
       beforeChange();
@@ -227,6 +261,7 @@ public class TransactionEventAssembler<E> {
    * Demarks the beginning of a transaction which accumulates all ListEvents received during the transaction and fires a single aggregate ListEvent on
    * {@link #commitEvent()}.
    */
+  @Override
   public void beginEvent() {
     beginEvent(true);
   }
@@ -240,6 +275,7 @@ public class TransactionEventAssembler<E> {
    *          <tt>true</tt> indicates ListEvents should be buffered and sent on {@link #commitEvent()}; <tt>false</tt> indicates they should be sent on
    *          immediately
    */
+  @Override
   public void beginEvent(boolean buffered) {
     // start a nestable ListEvent if we're supposed to buffer them
     if (buffered)
@@ -254,6 +290,7 @@ public class TransactionEventAssembler<E> {
    * Demarks the successful completion of a transaction. If changes were buffered during the transaction by calling {@link #beginEvent(boolean)
    * beginEvent(true)} then a single ListEvent will be fired from this TransactionList describing the changes accumulated during the transaction.
    */
+  @Override
   public void commitEvent() {
     // verify that there is a transaction to commit
     if (contextLevel == null)
@@ -266,6 +303,12 @@ public class TransactionEventAssembler<E> {
 
     this.contextLevel = this.contextLevel.getParent();
     nestedLevel--;
+  }
+
+  @Override
+  public void discardEvent() {
+    this.bufferedUpdates.discardEvent();
+    this.updates.discardEvent();
   }
 
   /**
@@ -307,12 +350,19 @@ public class TransactionEventAssembler<E> {
     }
   }
 
+  @Override
   public void addListEventListener(ListEventListener<? super E> listChangeListener) {
     this.updates.addListEventListener(listChangeListener);
   }
 
+  @Override
   public void removeListEventListener(ListEventListener<? super E> listChangeListener) {
     this.updates.removeListEventListener(listChangeListener);
+  }
+
+  @Override
+  public List<ListEventListener<E>> getListEventListeners() {
+    return this.updates.getListEventListeners();
   }
 
   public void addBufferedListEventListener(ListEventListener<? super E> listChangeListener) {

@@ -3,6 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
+import ca.odell.glazedlists.event.IListEventAssembler;
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEventPublisher;
@@ -379,7 +380,7 @@ public class EventListTest {
     @Test
     public void testGlazedListsEventListUsingVarArgsAndPublisherLock() {
         // make sure they have different backing stores
-        final ListEventPublisher publisher = ListEventAssembler.createListEventPublisher();
+        final ListEventPublisher publisher = IListEventAssembler.createListEventPublisher();
         final ReadWriteLock lock = LockFactory.DEFAULT.createReadWriteLock();
         final EventList<String> eventList = GlazedLists.eventListOf(publisher, lock, "A", "B");
         assertEquals(Arrays.asList("A", "B"), eventList);
@@ -401,7 +402,7 @@ public class EventListTest {
     public void testGlazedListsEventListUsingPublisherLock() {
         // make sure they have different backing stores
         final List<String> list = new ArrayList<>();
-        final ListEventPublisher publisher = ListEventAssembler.createListEventPublisher();
+        final ListEventPublisher publisher = IListEventAssembler.createListEventPublisher();
         final ReadWriteLock lock = LockFactory.DEFAULT.createReadWriteLock();
         final EventList<String> eventList = GlazedLists.eventList(publisher, lock, list);
         assertEquals(list, eventList);

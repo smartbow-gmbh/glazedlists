@@ -3,6 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
+import ca.odell.glazedlists.event.IListEventAssembler;
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
@@ -386,7 +387,7 @@ public class CollectionListTest {
         new CollectionList<>(source, GlazedLists.<String>listCollectionListModel());
         try {
             // try to add a new BasicEventList that uses its own publisher - it should fail
-            source.add(new BasicEventList<String>(ListEventAssembler.createListEventPublisher(), source.getReadWriteLock()));
+            source.add(new BasicEventList<String>(IListEventAssembler.createListEventPublisher(), source.getReadWriteLock()));
             fail("failed to receive an IllegalArgumentException when child EventList did not share the same publisher");
         } catch (IllegalArgumentException e) {
             // expected
@@ -403,7 +404,7 @@ public class CollectionListTest {
         }
 
         source = new BasicEventList<>();
-        source.add(new BasicEventList<String>(ListEventAssembler.createListEventPublisher(), source.getReadWriteLock()));
+        source.add(new BasicEventList<String>(IListEventAssembler.createListEventPublisher(), source.getReadWriteLock()));
         try {
             // try to create a CollectionList where one of the child EventLists uses a bad publisher - it should fail
             new CollectionList<>(source, GlazedLists.<String>listCollectionListModel());

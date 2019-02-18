@@ -25,7 +25,7 @@ import java.util.function.Consumer;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public final class ListEventAssembler<E> {
+public final class ListEventAssembler<E> implements  IListEventAssembler<E> {
     private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("ca.odell.glazedlists.event.debug"));
 
     /** the list that this tracks changes for */
@@ -58,8 +58,9 @@ public final class ListEventAssembler<E> {
      * Create a new {@link ListEventPublisher} for an {@link EventList} not attached
      * to any other {@link EventList}s.
      */
+    @Deprecated
     public static ListEventPublisher createListEventPublisher() {
-        return new SequenceDependenciesEventPublisher();
+        return IListEventAssembler.createListEventPublisher();
     }
 
     /**
@@ -445,10 +446,6 @@ public final class ListEventAssembler<E> {
         }else{
             consumer.accept(target);
         }
-    }
-
-    private static <T> void applyEvent(ListEvent<T> event, EventList<T> list){
-
     }
 
     private static <T> EventTransactionable<T> findTransactionable(List<T> list){

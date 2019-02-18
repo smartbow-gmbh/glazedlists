@@ -6,6 +6,7 @@ package ca.odell.glazedlists.impl.gui;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.event.IListEventAssembler;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -74,7 +75,7 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> impl
     private UpdateRunner updateRunner = new UpdateRunner();
 
     /** propagates events immediately. The source events might be fired later */
-    private final ListEventAssembler<E> cacheUpdates = new ListEventAssembler<>(this, ListEventAssembler.createListEventPublisher());
+    private final IListEventAssembler<E> cacheUpdates;
 
     /** whether the proxy thread has been scheduled */
     private volatile boolean scheduled = false;
@@ -93,6 +94,7 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> impl
         // populate the initial cache value
         localCache.addAll(source);
 
+        cacheUpdates = this.createCacheListEventAssembler();
         // handle my own events to update the internal state
         cacheUpdates.addListEventListener(updateRunner);
 
@@ -118,6 +120,10 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> impl
             scheduled = true;
             schedule(updateRunner);
         }
+    }
+
+    protected IListEventAssembler<E> createCacheListEventAssembler(){
+        return new ListEventAssembler<>(this, IListEventAssembler.createListEventPublisher());
     }
 
     /**

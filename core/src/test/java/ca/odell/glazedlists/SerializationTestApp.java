@@ -4,6 +4,7 @@
  */
 package ca.odell.glazedlists;
 
+import ca.odell.glazedlists.event.IListEventAssembler;
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
@@ -71,7 +72,7 @@ public class SerializationTestApp {
     /** creates some test data to serialize. */
     private static Object createTestData() {
         final ReadWriteLock sharedLock = LockFactory.DEFAULT.createReadWriteLock();
-        final ListEventPublisher sharedPublisher = ListEventAssembler.createListEventPublisher();
+        final ListEventPublisher sharedPublisher = IListEventAssembler.createListEventPublisher();
         final List<ListHolder> rootList = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
             final BasicEventList<String> eventList = new BasicEventList<>(sharedPublisher, sharedLock);

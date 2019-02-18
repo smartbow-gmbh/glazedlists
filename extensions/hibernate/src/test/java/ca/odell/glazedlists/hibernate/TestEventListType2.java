@@ -3,6 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.hibernate;
 
+import ca.odell.glazedlists.event.IListEventAssembler;
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
@@ -15,7 +16,7 @@ public final class TestEventListType2 extends EventListType {
     /** Lock as constant. */
     public static final ReadWriteLock LOCK = LockFactory.DEFAULT.createReadWriteLock();
     /** Publisher as constant. */
-    public static final ListEventPublisher PUBLISHER = ListEventAssembler.createListEventPublisher();
+    public static final ListEventPublisher PUBLISHER = IListEventAssembler.createListEventPublisher();
 
     /** Constructor which sets a list category. */
     public TestEventListType2() {
