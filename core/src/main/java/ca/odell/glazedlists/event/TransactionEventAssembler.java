@@ -1,9 +1,10 @@
-package ca.odell.glazedlists;
+package ca.odell.glazedlists.event;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import ca.odell.glazedlists.event.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
 
 public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
   /**
