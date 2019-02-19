@@ -60,7 +60,7 @@ public class Tree4Deltas<E> {
     public Tree4Deltas(){
     }
 
-    public Tree4Deltas(Tree4Deltas<E> deltas){
+    protected Tree4Deltas(Tree4Deltas<E> deltas){
         this.tree = deltas.tree.copy();
         this.allowContradictingEvents = deltas.allowContradictingEvents;
         this.initialCapacityKnown = deltas.initialCapacityKnown;
@@ -235,6 +235,10 @@ public class Tree4Deltas<E> {
         tree.clear();
         initialCapacityKnown = dynamicSizing ? false : true;
         ensureCapacity(size);
+    }
+
+    public Tree4Deltas<E> copy(){
+        return new Tree4Deltas<>(this);
     }
 
     private void ensureCapacity(int size) {

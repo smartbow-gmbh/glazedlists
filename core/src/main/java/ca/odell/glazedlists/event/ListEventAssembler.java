@@ -411,8 +411,8 @@ public final class ListEventAssembler<E> implements  IListEventAssembler<E> {
 
     protected ListEventAssembler<E> deepCopy(){
         ListEventAssembler<E> assembler = this.newAssembler();
-        assembler.blockSequence = this.blockSequence == null ? null : new BlockSequence<>(this.blockSequence);
-        assembler.listDeltas = this.listDeltas == null ? null : new Tree4Deltas<>(this.listDeltas);
+        assembler.blockSequence = this.blockSequence == null ? null : this.blockSequence.copy();
+        assembler.listDeltas = this.listDeltas == null ? null : this.listDeltas.copy();
         assembler.eventLevel = this.eventLevel;
         assembler.allowNestedEvents = this.allowNestedEvents;
         assembler.reorderMap = this.reorderMap;

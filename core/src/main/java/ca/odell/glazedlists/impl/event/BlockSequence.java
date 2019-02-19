@@ -185,6 +185,10 @@ public class BlockSequence<E> {
     return types.isEmpty();
   }
 
+  public BlockSequence<E> copy(){
+    return new BlockSequence<>(this);
+  }
+
   public void reset() {
     starts.clear();
     types.clear();
@@ -439,7 +443,7 @@ public class BlockSequence<E> {
     }
 
     public Iterator<E> deepCopy() {
-      Iterator<E> result = new Iterator<>(new BlockSequence<>(this.source));
+      Iterator<E> result = new Iterator<>(this.source.copy());
       this.copy(result);
       return result;
     }
