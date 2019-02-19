@@ -1,6 +1,7 @@
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.event.IListEventAssembler;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.TransactionEventAssembler;
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import org.junit.After;

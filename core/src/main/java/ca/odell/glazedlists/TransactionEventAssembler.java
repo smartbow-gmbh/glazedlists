@@ -3,7 +3,6 @@ package ca.odell.glazedlists;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.*;
 
 public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
@@ -85,7 +84,7 @@ public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
     return updates;
   }
 
-  private void beforeChange(){
+  private void beforeChange(boolean nested){
     updates.beginEvent();
   }
 
@@ -100,7 +99,7 @@ public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
   @Override
   public void elementInserted(int index, E newValue) {
     try {
-      beforeChange();
+      beforeChange(false);
       updates.elementInserted(index, newValue);
     } finally {
       afterChange();
@@ -113,7 +112,7 @@ public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
   @Override
   public void elementInserted(int index, List<E> newValues) {
     try {
-      beforeChange();
+      beforeChange(false);
       updates.elementInserted(index, newValues);
     } finally {
       afterChange();
@@ -126,7 +125,7 @@ public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
   @Override
   public void elementDeleted(int index, E oldValue) {
     try {
-      beforeChange();
+      beforeChange(false);
       updates.elementDeleted(index, oldValue);
     } finally {
       afterChange();
@@ -139,7 +138,7 @@ public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
   @Override
   public void elementDeleted(int index, List<E> oldValues) {
     try {
-      beforeChange();
+      beforeChange(false);
       updates.elementDeleted(index, oldValues);
     } finally {
       afterChange();
@@ -152,7 +151,7 @@ public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
   @Override
   public void elementUpdated(int index, List<ObjectChange<E>> changes){
     try {
-      beforeChange();
+      beforeChange(false);
       updates.elementUpdated(index, changes);
     } finally {
       afterChange();
@@ -166,7 +165,7 @@ public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
   @Override
   public void elementUpdated(int index, E oldValue, E newValue) {
     try {
-      beforeChange();
+      beforeChange(false);
       updates.elementUpdated(index, oldValue, newValue);
     } finally {
       afterChange();
@@ -176,7 +175,7 @@ public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
   @Override
   public void elementUpdated(int index, List<E> oldValues, List<E> newValues) {
     try {
-      beforeChange();
+      beforeChange(false);
       updates.elementUpdated(index, oldValues, newValues);
     } finally {
       afterChange();
@@ -186,7 +185,7 @@ public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
   @Override
   public void elementUpdated(int index, ObjectChange<E> change) {
     try {
-      beforeChange();
+      beforeChange(false);
       updates.elementUpdated(index, change);
     } finally {
       afterChange();
@@ -199,7 +198,7 @@ public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
   @Override
   public void addChange(int type, int index, ObjectChange<E> event) {
     try {
-      beforeChange();
+      beforeChange(false);
       updates.addChange(type, index, event);
     } finally {
       afterChange();
@@ -213,7 +212,7 @@ public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
   @Override
   public void addChange(int type, int startIndex, List<ObjectChange<E>> changeEvents) {
     try {
-      beforeChange();
+      beforeChange(false);
       updates.addChange(type, startIndex, changeEvents);
     } finally {
       afterChange();
@@ -227,7 +226,7 @@ public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
   @Override
   public void reorder(int[] reorderMap, List<ObjectChange<E>> changes){
     try {
-      beforeChange();
+      beforeChange(false);
       updates.reorder(reorderMap, changes);
     } finally {
       afterChange();
@@ -250,7 +249,7 @@ public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
   @Override
   public void forwardEvent(ListEvent<?> listChanges) {
     try {
-      beforeChange();
+      beforeChange(true);
       updates.forwardEvent(listChanges);
     } finally {
       afterChange();
@@ -278,8 +277,9 @@ public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
   @Override
   public void beginEvent(boolean buffered) {
     // start a nestable ListEvent if we're supposed to buffer them
-    if (buffered)
+    if (buffered) {
       bufferedUpdates.beginEvent(true);
+    }
 
     // push a new context onto the stack describing this new transaction
     contextLevel = new Context(buffered, contextLevel);
@@ -307,8 +307,8 @@ public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
 
   @Override
   public void discardEvent() {
-    this.bufferedUpdates.discardEvent();
     this.updates.discardEvent();
+    this.bufferedUpdates.discardEvent();
   }
 
   /**
