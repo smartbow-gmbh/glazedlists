@@ -86,7 +86,7 @@ public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
   }
 
   private void beforeChange(boolean nested){
-    updates.beginEvent();
+    updates.beginEvent(nested);
   }
 
   private void afterChange(){
