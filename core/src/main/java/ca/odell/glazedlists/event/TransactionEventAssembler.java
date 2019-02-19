@@ -22,10 +22,13 @@ public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
    **/
   private int nestedLevel = -1;
 
+  private boolean rollbackInProgress = false;
+
   // all changes directly made to this EventAssembler this acts like a view
   private final ListEventAssembler<E> updates;
   // all changes which are commited
   private final ListEventAssembler<E> bufferedUpdates;
+  private final List<ListEventListener<? super E>> rollbackListener;
 
   public TransactionEventAssembler() {
     this(true);
@@ -42,8 +45,13 @@ public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
   public TransactionEventAssembler(EventList<E> source, boolean rollbackSupport) {
     this.updates = new ListEventAssembler<>(source, IListEventAssembler.createListEventPublisher());
     this.bufferedUpdates = new ListEventAssembler<>(source, IListEventAssembler.createListEventPublisher());
+    this.rollbackListener = new CopyOnWriteArrayList<>();
     this.updates.addListEventListener(evt -> {
+      RuntimeException error = this.checkFireRollback(evt);
       this.bufferedUpdates.forwardEvent(evt);
+      if(error != null){
+        throw error;
+      }
     });
     // if rollback support is requested, build the necessary infrastructure
     if (rollbackSupport) {
@@ -83,6 +91,21 @@ public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
 
   protected ListEventAssembler<E> getUpdates() {
     return updates;
+  }
+
+  private RuntimeException checkFireRollback(ListEvent<E> evt){
+    RuntimeException err = null;
+    if(rollbackInProgress){
+      for(ListEventListener<? super E> listener : rollbackListener){
+        final ListEventListener<E> cListener = (ListEventListener<E>) listener;
+        try {
+          cListener.listChanged(evt);
+        }catch (RuntimeException error){
+          err = error;
+        }
+      }
+    }
+    return err;
   }
 
   private void beforeChange(boolean nested){
@@ -308,8 +331,16 @@ public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
 
   @Override
   public void discardEvent() {
+    if (contextLevel == null){
+      throw new IllegalStateException("Cannot discard without an event in progress");
+    }
     this.updates.discardEvent();
-    this.bufferedUpdates.discardEvent();
+    if(this.contextLevel.isEventStarted()) {
+      this.bufferedUpdates.discardEvent();
+    }
+
+    this.contextLevel = this.contextLevel.getParent();
+    nestedLevel--;
   }
 
   /**
@@ -328,10 +359,12 @@ public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
 
     // rollback all changes from the transaction as a single ListEvent
     updates.beginEvent(true);
+    rollbackInProgress = true;
     try {
       this.contextLevel.undo();
     } finally {
       updates.commitEvent();
+      rollbackInProgress = false;
     }
     if (this.contextLevel.isEventStarted()) {
       bufferedUpdates.discardEvent();
@@ -361,17 +394,25 @@ public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
     this.updates.removeListEventListener(listChangeListener);
   }
 
-  @Override
-  public List<ListEventListener<E>> getListEventListeners() {
-    return this.updates.getListEventListeners();
-  }
-
   public void addBufferedListEventListener(ListEventListener<? super E> listChangeListener) {
     this.bufferedUpdates.addListEventListener(listChangeListener);
   }
 
   public void removeBufferedListEventListener(ListEventListener<? super E> listChangeListener) {
     this.bufferedUpdates.removeListEventListener(listChangeListener);
+  }
+
+  public void addRollbackEventListener(ListEventListener<? super E> listChangeListener){
+    this.rollbackListener.add(listChangeListener);
+  }
+
+  public void removeRollbackEventListener(ListEventListener<? super E> listChangeListener){
+    this.rollbackListener.remove(listChangeListener);
+  }
+
+  @Override
+  public List<ListEventListener<E>> getListEventListeners() {
+    return this.updates.getListEventListeners();
   }
 
   /**
