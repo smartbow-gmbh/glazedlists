@@ -444,6 +444,12 @@ public class BlockSequence<E> {
       return result;
     }
 
+    public Iterator<E> withBlockSequence(BlockSequence<E> sequence){
+      Iterator<E> result = new Iterator<>(sequence);
+      this.copy(result);
+      return result;
+    }
+
     public int getIndex() {
       if (type == ListEvent.INSERT || type == ListEvent.UPDATE) {
         return startIndex + offset;

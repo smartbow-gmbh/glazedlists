@@ -409,6 +409,16 @@ public final class ListEventAssembler<E> implements  IListEventAssembler<E> {
         return new ListEventAssembler<>(this.sourceList, this.publisher);
     }
 
+    protected ListEventAssembler<E> deepCopy(){
+        ListEventAssembler<E> assembler = this.newAssembler();
+        assembler.blockSequence = this.blockSequence == null ? null : new BlockSequence<>(this.blockSequence);
+        assembler.listDeltas = this.listDeltas == null ? null : new Tree4Deltas<>(this.listDeltas);
+        assembler.eventLevel = this.eventLevel;
+        assembler.allowNestedEvents = this.allowNestedEvents;
+        assembler.reorderMap = this.reorderMap;
+        return assembler;
+    }
+
     // these methods are used by the ListEvent
     boolean getUseListBlocksLinear() { return useListBlocksLinear; }
     Tree4Deltas<E> getListDeltas() { return listDeltas; }

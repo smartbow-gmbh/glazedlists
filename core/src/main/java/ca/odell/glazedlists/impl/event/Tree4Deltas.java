@@ -57,6 +57,17 @@ public class Tree4Deltas<E> {
     /** Allow dynamically setting size of the tree according to the incoming events **/
     public boolean dynamicSizing = true;
 
+    public Tree4Deltas(){
+    }
+
+    public Tree4Deltas(Tree4Deltas<E> deltas){
+        this.tree = deltas.tree.copy();
+        this.allowContradictingEvents = deltas.allowContradictingEvents;
+        this.initialCapacityKnown = deltas.initialCapacityKnown;
+        this.horribleHackPreferMostRecentValue = deltas.horribleHackPreferMostRecentValue;
+        this.dynamicSizing = deltas.dynamicSizing;
+    }
+
     public boolean getAllowContradictingEvents() {
         return allowContradictingEvents;
     }
@@ -287,10 +298,16 @@ public class Tree4Deltas<E> {
             return new Iterator<>(tree, treeIterator.copy());
         }
 
-        public Iterator<E> deepCopy(){
+        public Iterator<E> deepCopy(Tree4Deltas<E> deltas){
             FourColorTree<ObjectChange<E>> copy = this.tree.copy();
             FourColorTreeIterator<ObjectChange<E>> iterator = this.treeIterator.copyWithTree(copy);
             return new Iterator<>(copy, iterator);
+        }
+
+        public Iterator<E> withDeltas(Tree4Deltas<E> deltas){
+            FourColorTree<ObjectChange<E>> tree = deltas.tree;
+            FourColorTreeIterator<ObjectChange<E>> iterator = this.treeIterator.copyWithTree(tree);
+            return new Iterator<>(tree, iterator);
         }
 
         public int getIndex() {

@@ -44,11 +44,10 @@ class Tree4DeltasListEvent<E> extends ListEvent<E> {
      */
     @Override
     public ListEvent<E> deepCopy() {
-        ListEventAssembler<E> newAssembler = deltasAssembler.newAssembler();
+        ListEventAssembler<E> newAssembler = deltasAssembler.deepCopy();
         Tree4DeltasListEvent<E> result = new Tree4DeltasListEvent<>(newAssembler, sourceList);
-        result.deltasIterator = deltasIterator != null ? deltasIterator.deepCopy() : null;
-        result.linearIterator = linearIterator != null ? linearIterator.deepCopy() : null;
-        result.deltasAssembler = newAssembler;
+        this.linearIterator = this.linearIterator == null ? null : this.linearIterator.withBlockSequence(newAssembler.getListBlocksLinear());
+        this.deltasIterator = this.deltasIterator == null ? null : this.deltasIterator.withDeltas(newAssembler.getListDeltas());
         return result;
     }
 
