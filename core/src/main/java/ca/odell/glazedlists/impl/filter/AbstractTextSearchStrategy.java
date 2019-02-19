@@ -3,6 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.filter;
 
+import ca.odell.glazedlists.filter.TextSearchStrategy;
+
 /**
  * An abstract base class to ease the burden of implementing the
  * {@link TextSearchStrategy} interface. This base class provides the

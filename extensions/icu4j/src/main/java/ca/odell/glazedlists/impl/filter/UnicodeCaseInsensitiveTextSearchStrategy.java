@@ -3,6 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.filter;
 
+import ca.odell.glazedlists.filter.TextSearchStrategy;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 
 import com.ibm.icu.text.Collator;

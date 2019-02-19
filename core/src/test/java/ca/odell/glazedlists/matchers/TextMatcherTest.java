@@ -8,8 +8,8 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.impl.filter.TextMatcher;
-import ca.odell.glazedlists.impl.filter.TextMatchers;
+import ca.odell.glazedlists.filter.TextMatcher;
+import ca.odell.glazedlists.filter.TextMatchers;
 
 import java.util.ArrayList;
 import java.util.Arrays;

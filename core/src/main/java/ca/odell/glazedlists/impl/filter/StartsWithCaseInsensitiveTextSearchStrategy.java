@@ -3,6 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.filter;
 
+import ca.odell.glazedlists.filter.TextSearchStrategy;
+
 /**
  * This implementation of {@link TextSearchStrategy} matches a given text
  * against the prefix of a given string. If the given string starts with the

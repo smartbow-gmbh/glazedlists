@@ -9,12 +9,12 @@ import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.impl.filter.BoyerMooreCaseInsensitiveTextSearchStrategy;
 import ca.odell.glazedlists.impl.filter.ExactCaseInsensitiveTextSearchStrategy;
 import ca.odell.glazedlists.impl.filter.RegularExpressionTextSearchStrategy;
-import ca.odell.glazedlists.impl.filter.SearchTerm;
+import ca.odell.glazedlists.filter.SearchTerm;
 import ca.odell.glazedlists.impl.filter.SingleCharacterCaseInsensitiveTextSearchStrategy;
 import ca.odell.glazedlists.impl.filter.StartsWithCaseInsensitiveTextSearchStrategy;
-import ca.odell.glazedlists.impl.filter.TextMatcher;
-import ca.odell.glazedlists.impl.filter.TextMatchers;
-import ca.odell.glazedlists.impl.filter.TextSearchStrategy;
+import ca.odell.glazedlists.filter.TextMatcher;
+import ca.odell.glazedlists.filter.TextMatchers;
+import ca.odell.glazedlists.filter.TextSearchStrategy;
 
 /**
  * A matcher editor that matches Objects that contain a filter text string.

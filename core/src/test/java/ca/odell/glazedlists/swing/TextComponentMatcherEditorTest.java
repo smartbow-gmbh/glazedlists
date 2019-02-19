@@ -5,7 +5,7 @@ package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.impl.filter.TextMatcher;
+import ca.odell.glazedlists.filter.TextMatcher;
 import ca.odell.glazedlists.matchers.SimpleMatcherEditorListener;
 
 import javax.swing.JTextField;

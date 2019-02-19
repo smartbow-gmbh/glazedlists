@@ -2,9 +2,9 @@ package ca.odell.glazedlists.matchers;
 
 import ca.odell.glazedlists.TextFilterable;
 import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.impl.filter.SearchTerm;
-import ca.odell.glazedlists.impl.filter.TextMatcher;
-import ca.odell.glazedlists.impl.filter.TextMatchers;
+import ca.odell.glazedlists.filter.SearchTerm;
+import ca.odell.glazedlists.filter.TextMatcher;
+import ca.odell.glazedlists.filter.TextMatchers;
 
 import java.io.Serializable;
 import java.util.HashSet;

@@ -3,7 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.matchers;
 
-import ca.odell.glazedlists.impl.filter.TextSearchStrategy;
+import ca.odell.glazedlists.filter.TextSearchStrategy;
 import ca.odell.glazedlists.impl.filter.UnicodeCaseInsensitiveTextSearchStrategy;
 
 /**

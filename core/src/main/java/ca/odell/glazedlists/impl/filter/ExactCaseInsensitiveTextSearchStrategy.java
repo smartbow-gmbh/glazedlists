@@ -3,6 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.filter;
 
+import ca.odell.glazedlists.filter.TextSearchStrategy;
+
 /**
  * This implementation of {@link TextSearchStrategy} matches a given text
  * against an exact subtext. If the subtext matches the given text character

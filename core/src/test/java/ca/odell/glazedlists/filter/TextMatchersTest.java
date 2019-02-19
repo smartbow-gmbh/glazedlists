@@ -1,9 +1,13 @@
 /* Glazed Lists                                                 (c) 2003-2006 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package ca.odell.glazedlists.impl.filter;
+package ca.odell.glazedlists.filter;
 
 import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.filter.SearchTerm;
+import ca.odell.glazedlists.filter.TextMatcher;
+import ca.odell.glazedlists.filter.TextMatchers;
+import ca.odell.glazedlists.filter.TextSearchStrategy;
 import ca.odell.glazedlists.matchers.SearchEngineTextMatcherEditor;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 

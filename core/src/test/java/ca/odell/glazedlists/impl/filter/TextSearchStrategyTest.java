@@ -4,6 +4,7 @@
 package ca.odell.glazedlists.impl.filter;
 
 // for being a JUnit test case
+import ca.odell.glazedlists.filter.TextSearchStrategy;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
