@@ -398,7 +398,9 @@ public final class ListEventAssembler<E> implements  IListEventAssembler<E> {
      * @return
      */
     public ListEvent<E> getCurrentChanges(){
-        return this.listEvent.deepCopy();
+        final ListEvent<E> copy = this.listEvent.deepCopy();
+        copy.reset();
+        return copy;
     }
 
     public ListEvent<E> emptyEvent() {
