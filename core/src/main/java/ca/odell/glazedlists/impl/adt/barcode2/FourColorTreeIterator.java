@@ -157,14 +157,14 @@ public class FourColorTreeIterator <  T0>   {
     }
 
     public FourColorTreeIterator <  T0>   copyWithTree(FourColorTree<T0> tree) {
-        FourColorTreeIterator <  T0>   result = new FourColorTreeIterator <  T0>  (tree);
+        FourColorTreeIterator<T0> result = new FourColorTreeIterator <>  (tree);
 
         result.count1 = this.count1;
         result.count2 = this.count2;
         result.count4 = this.count4;
         result.count8 = this.count8;
 
-        result.node = node.copy();
+        result.node = (FourColorNode<T0>) tree.get(index, node.color);
         result.index = index;
         return result;
     }
