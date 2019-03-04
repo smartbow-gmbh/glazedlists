@@ -141,7 +141,7 @@ public class FourColorTree <  T0>   {
 
     public FourColorTree<T0> copy(){
         FourColorTree<T0> copy = new FourColorTree<>(this.coder, this.comparator);
-        copy.root = this.root == null ? null : this.root.copy();
+        copy.root = this.root == null ? null : this.root.copy(null);
         copy.zeroQueue.addAll(this.zeroQueue);
         return copy;
     }
