@@ -164,7 +164,7 @@ public class FourColorTreeIterator <  T0>   {
         result.count4 = this.count4;
         result.count8 = this.count8;
 
-        result.node = (FourColorNode<T0>) tree.get(index, node.color);
+        result.node = node == null ? null : (FourColorNode<T0>) tree.get(index, node.color);
         result.index = index;
         return result;
     }
