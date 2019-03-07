@@ -404,7 +404,9 @@ public final class ListEventAssembler<E> implements  IListEventAssembler<E> {
     }
 
     public ListEvent<E> emptyEvent() {
-        return new Tree4DeltasListEvent<>(this.newAssembler(), this.sourceList);
+        final Tree4DeltasListEvent<E> emptyEvent = new Tree4DeltasListEvent<>(this.newAssembler(), this.sourceList);
+        emptyEvent.reset();
+        return emptyEvent;
     }
 
     public ListEventAssembler<E> newAssembler(){
