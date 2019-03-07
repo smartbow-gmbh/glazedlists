@@ -358,12 +358,10 @@ public class TransactionEventAssembler<E> implements IListEventAssembler<E> {
       throw new IllegalStateException("No ListEvent exists to roll back");
 
     // rollback all changes from the transaction as a single ListEvent
-    updates.beginEvent(true);
     rollbackInProgress = true;
     try {
       this.contextLevel.undo();
     } finally {
-      updates.commitEvent();
       rollbackInProgress = false;
     }
     if (this.contextLevel.isEventStarted()) {
