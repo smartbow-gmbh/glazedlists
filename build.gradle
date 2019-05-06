@@ -5,8 +5,9 @@ plugins {
     id "base"
     id "maven"
     id "signing"
-    id "us.kirchmeier.capsule" version "1.0.2"
-    id "biz.aQute.bnd.builder" version "3.3.0"
+    id "it.gianluz.capsule" version "1.0.3"
+    id "biz.aQute.bnd.builder" version "4.1.0"
+    id 'org.openjfx.javafxplugin' version '0.0.7' apply false
     id 'io.codearte.nexus-staging' version '0.20.0'
 }
 
@@ -61,6 +62,10 @@ subprojects {
         systemProperties 'java.awt.headless': 'true'
         maxHeapSize = "512m"
 
+        if (project.hasProperty('excludeTests')) { 
+            exclude project.property('excludeTests')
+        } 
+
         testLogging {
             events "failed"
             exceptionFormat "short"
@@ -94,6 +99,7 @@ clean.doLast {
  */
 task docs(type: Javadoc) {
     options.addStringOption('Xdoclint:none', '-quiet')
+    options.jFlags('-Dhttp.agent=gradle-javadoc')
     classpath = files(exportedProjects.collect { it.sourceSets.main.compileClasspath + it.sourceSets.main.output })
     source = exportedProjects.collect { it.sourceSets.main.allJava }
     destinationDir = file("$targetDir/docs/api")
@@ -109,9 +115,9 @@ task docs(type: Javadoc) {
             "http://docs.oracle.com/javase/8/docs/api/",
             "http://help.eclipse.org/neon/topic/org.eclipse.platform.doc.isv/reference/api/",
             "http://doc.formdev.com/jgoodies-forms/",
-            "http://nachocalendar.sourceforge.net/doc/",
+            "http://nachocalendar.sourceforge.net/apidocs/",
             "http://www.jfree.org/jfreechart/api/javadoc/",
-            "http://javadoc.geotoolkit.org/external/swingx/",
+	    "https://static.javadoc.io/org.swinglabs.swingx/swingx-all/1.6.5-1/",
             "https://docs.jboss.org/hibernate/orm/current/javadocs/"
         )
     }

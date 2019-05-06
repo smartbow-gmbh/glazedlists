@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.com/swimmesberger/glazedlists.svg?branch=master)](https://travis-ci.com/swimmesberger/glazedlists)
 
+[![Build Status](https://dev.azure.com/glazedlists/glazedlists/_apis/build/status/glazedlists.glazedlists?branchName=azure-integration)](https://dev.azure.com/glazedlists/glazedlists/_build/latest?definitionId=1&branchName=master)
+
 [![Join the chat at https://gitter.im/glazedlists/glazedlists](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/glazedlists/glazedlists)
 
 ### Project sites
@@ -21,6 +23,8 @@ See documentation at [www.glazedlists.com](http://www.glazedlists.com/documentat
 Browse [Release Notes](http://www.glazedlists.com/releases)
 
 Download [Latest Release](https://repo1.maven.org/maven2/at/swimmesberger/glazedlists/1.12.0/)
+
+Download [Latest Snapshot version](https://oss.sonatype.org/content/repositories/snapshots/com/glazedlists/glazedlists/1.12.0-SNAPSHOT/)
 
 Configure [Maven](http://www.glazedlists.com/Home/maven)
 
