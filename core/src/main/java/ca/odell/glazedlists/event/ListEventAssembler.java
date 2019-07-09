@@ -420,6 +420,7 @@ public final class ListEventAssembler<E> implements  IListEventAssembler<E> {
         assembler.eventLevel = this.eventLevel;
         assembler.allowNestedEvents = this.allowNestedEvents;
         assembler.reorderMap = this.reorderMap;
+        assembler.useListBlocksLinear = this.useListBlocksLinear;
         return assembler;
     }
 
