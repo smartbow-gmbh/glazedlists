@@ -209,7 +209,7 @@ artifacts {
 
 signing {
     required { gradle.taskGraph.hasTask("uploadArchives") }
-
+    useGpgCmd()
     sign configurations.archives
 }
 

@@ -45,6 +45,7 @@ steps:
         -PmavenSnapshotsRepositoryUrl=$(ARTIFACTORY_URL)
         -PmavenStagingRepositoryId=$(ARTIFACTORY_REPO)
         -PmavenStagingRepositoryUrl=$(ARTIFACTORY_URL)
+        -Psigning.gnupg.useLegacyGpg=true
         -Psigning.keyId=$(signingkey_id)
         -Psigning.password=$(signingkey_passphrase)
         -Psigning.secretKeyRingFile=$(Agent.HomeDirectory)/gpg/secring.gpg
