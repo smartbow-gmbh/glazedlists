@@ -34,7 +34,7 @@ steps:
   displayName: Setup Window Manager
 - script: |-
     wget https://cdn.azul.com/zulu/bin/zulu8.40.0.25-ca-fx-jdk8.0.222-linux_x64.tar.gz -O zulufx.tar.gz
-    tar -xf zulufx.tar.gz -C $(Agent.HomeDirectory)/zulufx --strip-components=1
+    mkdir -p $(Agent.HomeDirectory)/zulufx && tar -xf zulufx.tar.gz -C $(Agent.HomeDirectory)/zulufx --strip-components=1
   displayName: 'Installing javafx'
 - task: Gradle@2
   inputs:
