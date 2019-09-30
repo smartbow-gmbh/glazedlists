@@ -47,7 +47,7 @@ steps:
         -PmavenStagingRepositoryUrl=$(ARTIFACTORY_URL)
         -Psigning.keyId=$(signingkey_id)
         -Psigning.password=$(signingkey_passphrase)
-        -Dsigning.secretKeyRingFile=$(Agent.HomeDirectory)/gpg/secring.gpg
+        -Psigning.secretKeyRingFile=$(Agent.HomeDirectory)/gpg/secring.gpg
     tasks: 'uploadArchives'
     publishJUnitResults: true
     testResultsFiles: '**/TEST-*.xml'
