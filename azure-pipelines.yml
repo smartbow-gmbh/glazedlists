@@ -27,7 +27,8 @@ steps:
 - bash: |
     set -e
     set -x
-    sudo apt install metacity        
+    sudo apt install metacity     
+    sudo apt install openjfx    
     Xvfb :1 &
     sleep 5
     metacity --sm-disable --replace 2> metacity.err &
