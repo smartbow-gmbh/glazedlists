@@ -5,7 +5,8 @@ pool:
   vmImage: 'ubuntu-16.04'
 variables:
 - group: Security
-  DISPLAY: :1
+- name: 'DISPLAY'
+  value: ':1'
 
 steps:
 - task: DownloadSecureFile@1
