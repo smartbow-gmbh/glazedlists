@@ -41,10 +41,8 @@ steps:
     options: >-
         -PmavenUsername=$(ARTIFACTORY_USERNAME)
         -PmavenPassword=$(ARTIFACTORY_PASSWORD)
-        -PmavenSnapshotsRepositoryId=$(ARTIFACTORY_SNAPSHOT_REPO)
-        -PmavenSnapshotsRepositoryUrl=$(ARTIFACTORY_URL)
-        -PmavenStagingRepositoryId=$(ARTIFACTORY_REPO)
-        -PmavenStagingRepositoryUrl=$(ARTIFACTORY_URL)
+        -PmavenSnapshotsRepositoryUrl=$(ARTIFACTORY_URL)/$(ARTIFACTORY_SNAPSHOT_REPO)
+        -PmavenStagingRepositoryUrl=$(ARTIFACTORY_URL)/$(ARTIFACTORY_REPO)
         -Psigning.gnupg.useLegacyGpg=true
         -Psigning.gnupg.keyName=$(signingkey_id)
         -Psigning.gnupg.passphrase=$(signingkey_passphrase)
