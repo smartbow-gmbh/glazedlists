@@ -21,8 +21,8 @@ steps:
     sudo apt-get update
     sudo apt-get install gnupg
     mkdir -p $(Agent.HomeDirectory)/gpg
-    gpg --keyring=$(Agent.HomeDirectory)/gpg/pubring.gpg --no-default-keyring --batch --import $(signingkey.secureFilePath)
-    gpg --keyring=$(Agent.HomeDirectory)/gpg/secring.gpg --no-default-keyring --batch --allow-secret-key-import --import $(signingkey_private.secureFilePath)
+    gpg --batch --import $(signingkey.secureFilePath)
+    gpg --batch --allow-secret-key-import --import $(signingkey_private.secureFilePath)
   displayName: 'Installing gpg'
 - bash: |
     set -e
@@ -46,9 +46,8 @@ steps:
         -PmavenStagingRepositoryId=$(ARTIFACTORY_REPO)
         -PmavenStagingRepositoryUrl=$(ARTIFACTORY_URL)
         -Psigning.gnupg.useLegacyGpg=true
-        -Psigning.keyId=$(signingkey_id)
-        -Psigning.password=$(signingkey_passphrase)
-        -Psigning.secretKeyRingFile=$(Agent.HomeDirectory)/gpg/secring.gpg
+        -Psigning.gnupg.keyName=$(signingkey_id)
+        -Psigning.gnupg.passphrase=$(signingkey_passphrase)
     tasks: 'uploadArchives'
     publishJUnitResults: true
     testResultsFiles: '**/TEST-*.xml'
