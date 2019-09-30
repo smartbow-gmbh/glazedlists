@@ -1,3 +1,12 @@
+buildscript {
+  repositories {
+    jcenter()
+  }
+  dependencies {
+    classpath "org.jfrog.buildinfo:build-info-extractor-gradle:latest.release"
+  }
+}
+
 /**
  * settings and plugins for build
  */
@@ -7,14 +16,13 @@ plugins {
     id "signing"
     id "it.gianluz.capsule" version "1.0.3"
     id "biz.aQute.bnd.builder" version "4.1.0"
-    id 'org.openjfx.javafxplugin' version '0.0.7' apply false
-    id 'io.codearte.nexus-staging' version '0.20.0'
+    id "org.openjfx.javafxplugin" version "0.0.7" apply false
 }
 
 /**
  * group and version (artifact is set from rootProject.name in settings.gradle
  */
-group "at.swimmesberger"
+group "com.smartbow"
 version "$nextReleaseVersion${isSnapshot == "true" ? "-SNAPSHOT" : ""}"
 
 /**
@@ -117,7 +125,7 @@ task docs(type: Javadoc) {
             "http://doc.formdev.com/jgoodies-forms/",
             "http://nachocalendar.sourceforge.net/apidocs/",
             "http://www.jfree.org/jfreechart/api/javadoc/",
-	    "https://static.javadoc.io/org.swinglabs.swingx/swingx-all/1.6.5-1/",
+            "https://static.javadoc.io/org.swinglabs.swingx/swingx-all/1.6.5-1/",
             "https://docs.jboss.org/hibernate/orm/current/javadocs/"
         )
     }
@@ -205,23 +213,17 @@ signing {
     sign configurations.archives
 }
 
-nexusStaging {
-    packageGroup = group
-    username = sonatypeUsername
-    password = sonatypePassword
-}
-
 uploadArchives {
     repositories {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
             repository(url: "${mavenStagingRepositoryUrl}") {
-                authentication(userName: sonatypeUsername, password: sonatypePassword)
+                authentication(userName: mavenUsername, password: mavenPassword)
             }
 
             snapshotRepository(url: "${mavenSnapshotsRepositoryUrl}") {
-                authentication(userName: sonatypeUsername, password: sonatypePassword)
+                authentication(userName: mavenUsername, password: mavenPassword)
             }
 
             pom.project {

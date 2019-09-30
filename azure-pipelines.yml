@@ -1,24 +1,45 @@
-jobs:
-  # Linux job
-  - template: build-job.yml
-    parameters:
-      name: Linux
-      pool:
-        vmImage: 'ubuntu-16.04'
-      initWindowManager: true
-  
-  # Mac OS job
-  - template: build-job.yml
-    parameters:
-      name: MacOS
-      pool:
-        vmImage: 'macOS-10.13'
-      tasks: 'build -x :extensions:swt:test'
+trigger:
+- master
 
-  # Windows job
-  - template: build-job.yml
-    parameters:
-      name: Windows
-      pool:
-        vmImage: 'windows-2019'
-      tasks: 'build -PexcludeTests=**/CTPConnectionTest*'
+pool:
+  vmImage: 'ubuntu-16.04'
+variables:
+- group: Security
+  DISPLAY: :1
+
+steps:
+- task: DownloadSecureFile@1
+  name: signingkey
+  inputs:
+    secureFile: 'signingkey.asc'
+- task: DownloadSecureFile@1
+  name: signingkey_private
+  inputs:
+    secureFile: 'signingkey.private.asc'
+- script: |-
+    sudo apt-get install gnupg
+    mkdir -p $(Agent.HomeDirectory)/gpg
+    gpg --keyring=$(Agent.HomeDirectory)/gpg/pubring.gpg --no-default-keyring --batch --import $(signingkey.secureFilePath)
+    gpg --keyring=$(Agent.HomeDirectory)/gpg/secring.gpg --no-default-keyring --batch --allow-secret-key-import --import $(signingkey_private.secureFilePath)
+  displayName: 'Installing gpg'
+- bash: |
+    set -e
+    set -x
+    sudo apt install metacity        
+    Xvfb :1 &
+    sleep 5
+    metacity --sm-disable --replace 2> metacity.err &
+  displayName: Setup Window Manager
+- task: Gradle@2
+  inputs:
+    options: >-
+        -PmavenUsername=$(ARTIFACTORY_USERNAME)
+        -PmavenPassword=$(ARTIFACTORY_PASSWORD)
+        -PmavenSnapshotsRepositoryId=$(ARTIFACTORY_SNAPSHOT_REPO)
+        -PmavenSnapshotsRepositoryUrl=$(ARTIFACTORY_URL)
+        -PmavenStagingRepositoryId=$(ARTIFACTORY_REPO)
+        -PmavenStagingRepositoryUrl=$(ARTIFACTORY_URL)
+        -Psigning.keyId=$(signingkey_id)
+        -Psigning.password=$(signingkey_passphrase)
+        -Dgpg.secretKeyring=$(Agent.HomeDirectory)/gpg/secring.gpg
+    tasks: 'uploadArchives'
