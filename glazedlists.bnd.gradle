@@ -21,9 +21,9 @@ Source-Version: JDK ${sourceCompatibility}
 
 # OSGi bundle information
 Bundle-ManifestVersion: 2
-Bundle-SymbolicName: glazedlists
+Bundle-SymbolicName: ${rootProject.name}
 Bundle-Name: Glazed Lists
-Bundle-SymbolicName: at.swimmesberger.glazedlists
+Bundle-SymbolicName: ${mvnGroup}.${rootProject.name}
 Bundle-Version: ${implementationVersion}
 Bundle-ClassPath: .
 

@@ -22,7 +22,7 @@ plugins {
 /**
  * group and version (artifact is set from rootProject.name in settings.gradle
  */
-group "com.smartbow"
+group "${mvnGroup}"
 version "$nextReleaseVersion${isSnapshot == "true" ? "-SNAPSHOT" : ""}"
 
 /**
